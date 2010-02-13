@@ -11,11 +11,14 @@ class RelationallyScopedQueryGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def author = "Your name"
-    def authorEmail = ""
-    def title = "Plugin summary/headline"
+    def author = "James Coleman"
+    def authorEmail = "jtc331+scopedquery@gmail.com"
+    def title = "Relationally Scoped Querying"
     def description = '''\\
-Brief description of the plugin.
+This plugin was inspired by both the power of Groovy builders in HibernateCriteriaBuilder 
+and the new Relation querying API that appeared in ActiveRecord with Rails 3.0. Major goals 
+include arbitrarily nested reuasable scopes and lazy execution of the query generated. Also available 
+will be a level of introspection into the logical expression generated that Criteria cannot provide.
 '''
 
     // URL to the plugin's documentation
