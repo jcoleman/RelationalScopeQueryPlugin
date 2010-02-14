@@ -1,4 +1,4 @@
-package comparison
+package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
 

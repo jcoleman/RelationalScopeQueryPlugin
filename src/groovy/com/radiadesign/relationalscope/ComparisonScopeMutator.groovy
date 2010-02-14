@@ -1,4 +1,6 @@
-import comparison.*
+package com.radiadesign.relationalscope
+
+import com.radiadesign.relationalscope.comparison.*
 
 class ComparisonScopeMutator {
   

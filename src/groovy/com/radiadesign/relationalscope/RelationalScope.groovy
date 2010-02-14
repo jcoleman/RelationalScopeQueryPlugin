@@ -1,3 +1,5 @@
+package com.radiadesign.relationalscope
+
 import org.hibernate.criterion.*
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
