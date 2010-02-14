@@ -38,7 +38,7 @@ class RelationalScope {
   def where(Closure block) {
     def builder = new RelationalScopeBuilder(domain)
     block.delegate = builder
-    block.resolveStrategy = Closure.DELEGATE_ONLY
+    block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
     return this.where(block.relationalScope)
   }
