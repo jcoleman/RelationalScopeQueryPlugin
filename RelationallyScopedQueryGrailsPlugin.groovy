@@ -4,7 +4,7 @@ class RelationallyScopedQueryGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.0 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def dependsOn = [hibernate:"1.2.0 > *"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -37,7 +37,7 @@ will be a level of introspection into the logical expression generated that Crit
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
+        RelationalScope.sessionFactory = applicationContext.getBean("sessionFactory")
     }
 
     def onChange = { event ->
