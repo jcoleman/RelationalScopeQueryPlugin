@@ -9,7 +9,7 @@ class RelationalScopeBuilder {
   }
   
   def methodMissing(String name, args) {
-    å
+    
   }
   
   // This returns an object upon which may be called any of the supported comparison

@@ -1,7 +1,7 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
-import org.codehaus.groovy.grails.commons.ApplicationHolder
+import com.radiadesign.relationalscope.junction.*
 
 class RelationalScope {
   
@@ -18,6 +18,10 @@ class RelationalScope {
   
   RelationalScope(Class _domain) {
     domain = _domain
+  }
+  
+  RelationalScope(JSONObject json) {
+    
   }
   
   private RelationalScope(Class _domain, ArrayList _scopes) {
@@ -54,6 +58,10 @@ class RelationalScope {
     scopes << additionalScope
   }
   
+  String fullPropertyNameFor(String propertyName) {
+    return propertyName
+  }
+  
   
   // --------------------------------------------------------------------------
   // Private API
@@ -72,6 +80,7 @@ class RelationalScope {
       return scopes.first().toCriterion()
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
+      new AndScopeJunction(scopes).toCriterion()
     } else {
       // There is no criteria to create.
       return null
