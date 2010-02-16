@@ -1,5 +1,7 @@
 package com.radiadesign.relationalscope
 
+import com.radiadesign.relationalscope.comparison.*
+
 class RelationalScopeBuilder {
   
   RelationalScope scope
@@ -9,7 +11,12 @@ class RelationalScopeBuilder {
   }
   
   def methodMissing(String name, args) {
-    
+    assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
+    args[0].each {
+      if (it.key == 'eq') {
+        scope.addScopeOrComparison(new EqScopeComparison (name, it.value))
+      }
+    }
   }
   
   def where(arg) {
@@ -26,12 +33,6 @@ class RelationalScopeBuilder {
   
   def not(arg) {
     scope.addScopeOrComparison( new NotRelationalScope().where(arg) )
-  }
-   
-  // This returns an object upon which may be called any of the supported comparison
-  // operations. That call is expected to modify <this.scope>.
-  def propertyMissing(String name) {
-    new ComparisonScopeMutator(scope, name)
   }
   
   def getRelationalScope() {
