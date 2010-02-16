@@ -20,9 +20,9 @@ class RelationalScope {
     domain = _domain
   }
   
-  RelationalScope(JSONObject json) {
-    
-  }
+  //RelationalScope(JSONObject json) {
+  //  
+  //}
   
   private RelationalScope(Class _domain, ArrayList _scopes) {
     // Provides a deep copy of the stored scopes to ensure thread safety
