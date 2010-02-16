@@ -2,25 +2,25 @@ package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
 
-class OrRelationalScope extends RelationalScope {
+class NotRelationalScope extends OrRelationalScope {
   
   // --------------------------------------------------------------------------
   // Constructors
   // --------------------------------------------------------------------------
   
-  OrRelationalScope() {
+  NotRelationalScope() {
     super()
   }
   
-  OrRelationalScope(Class _domain) {
+  NotRelationalScope(Class _domain) {
     super(_domain)
   }
   
-  //OrRelationalScope(JSONObject json) {
+  //NotRelationalScope(JSONObject json) {
   //  super(json)
   //}
   
-  private OrRelationalScope(Class _domain, ArrayList _scopes) {
+  private NotRelationalScope(Class _domain, ArrayList _scopes) {
     super(_domain, _scopes)
   }
   
@@ -30,11 +30,11 @@ class OrRelationalScope extends RelationalScope {
   // --------------------------------------------------------------------------
   
   def instance() {
-    new OrRelationalScope()
+    new NotRelationalScope()
   }
   
-  def junction() {
-    Restrictions.disjunction()
+  Criterion toCriterion() {
+    Restrictions.not(super.toCriterion())
   }
   
 }

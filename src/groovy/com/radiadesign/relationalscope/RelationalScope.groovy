@@ -15,6 +15,10 @@ class RelationalScope {
   // Constructors
   // --------------------------------------------------------------------------
   
+  RelationalScope() {
+    // Do nothing
+  }
+  
   RelationalScope(Class _domain) {
     domain = _domain
   }
@@ -41,7 +45,7 @@ class RelationalScope {
   }
   
   def where(Closure block) {
-    def builder = new RelationalScopeBuilder(domain)
+    def builder = new RelationalScopeBuilder(instance())
     block.delegate = builder
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
@@ -74,6 +78,10 @@ class RelationalScope {
   
   def junction() {
     Restrictions.conjunction()
+  }
+  
+  def instance() {
+    new RelationalScope()
   }
   
   Criterion toCriterion() {
