@@ -1,7 +1,6 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
-import com.radiadesign.relationalscope.junction.*
 
 class RelationalScope {
   
@@ -73,6 +72,10 @@ class RelationalScope {
     results = criteria.list()
   }
   
+  def junction() {
+    Restrictions.conjunction()
+  }
+  
   Criterion toCriterion() {
     if (scopes.size() == 1) {
       // If there is only one scope contained in this object then
@@ -80,7 +83,9 @@ class RelationalScope {
       return scopes.first().toCriterion()
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
-      new AndScopeJunction(scopes).toCriterion()
+      scopes.inject(this.junction()) { criterion, scope ->
+        criterion.add(scope.toCriterion())
+      }
     } else {
       // There is no criteria to create.
       return null
