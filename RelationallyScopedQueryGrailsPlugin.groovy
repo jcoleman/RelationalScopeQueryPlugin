@@ -1,3 +1,5 @@
+import com.radiadesign.relationalscope.RelationalScope
+
 class RelationallyScopedQueryGrailsPlugin {
     // the plugin version
     def version = "0.1"
