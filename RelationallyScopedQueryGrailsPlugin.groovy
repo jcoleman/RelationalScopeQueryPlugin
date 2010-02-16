@@ -34,8 +34,19 @@ will be a level of introspection into the logical expression generated that Crit
         // TODO Implement runtime spring config (optional)
     }
 
-    def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
+    def doWithDynamicMethods = { context ->
+      application.domainClasses.each { domainClass ->
+        installStaticMethods(domainClass.clazz)
+      }
+    }
+    
+    def installStaticMethods(Class klass) {
+      klass.metaClass.static.blankScope = { ->
+        return new RelationalScope(klass)
+      }
+      klass.metaClass.static.where = { Closure block ->
+        klass.blankScope().where(block)
+      }
     }
 
     def doWithApplicationContext = { applicationContext ->
