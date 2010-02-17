@@ -13,9 +13,7 @@ class RelationalScopeBuilder {
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     args[0].each {
-      if (it.key == 'eq') {
-        scope.addScopeOrComparison(new EqScopeComparison (name, it.value))
-      }
+      scope.addScopeOrComparison(ScopeComparisonFactory."${it.key}"(name, it.value))
     }
   }
   
