@@ -5,7 +5,7 @@ class ScopeComparisonFactory {
   private ScopeComparisonFactory() { }
   
   static equals(String propertyName, value) {
-    new EqScopeComparison (propertyName, value)
+    new EqualsScopeComparison (propertyName, value)
   }
   
 }
