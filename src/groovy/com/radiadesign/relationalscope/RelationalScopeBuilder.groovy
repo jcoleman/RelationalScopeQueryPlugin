@@ -33,6 +33,9 @@ class RelationalScopeBuilder {
     scope.addScopeOrComparison( new NotRelationalScope().where(arg) )
   }
   
+  // Helper property for 'is' comparison
+  final notNull = 1
+  
   def getRelationalScope() {
     return scope
   }

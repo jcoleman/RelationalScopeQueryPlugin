@@ -8,4 +8,8 @@ class ScopeComparisonFactory {
     new EqualsScopeComparison (propertyName, value)
   }
   
+  static is(String propertyName, value) {
+    new IsScopeComparison (propertyName, value)
+  }
+  
 }
