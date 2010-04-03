@@ -6,6 +6,8 @@ class RelationalScopeBuilder {
   
   RelationalScope scope
   
+  def scopeStack
+  
   RelationalScopeBuilder(RelationalScope _scope) {
     scope = _scope
   }
@@ -13,24 +15,46 @@ class RelationalScopeBuilder {
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     args[0].each {
-      scope.addScopeOrComparison(ScopeComparisonFactory."${it.key}"(name, it.value))
+      addScopeOrComparisonToCurrentScope( ScopeComparisonFactory."${it.key}"(name, it.value) )
     }
   }
   
   def where(arg) {
-    scope.addScopeOrComparison( new RelationalScope().where(arg) )
+    project( new RelationalScope(), arg )
   }
   
   def or(arg) {
-    scope.addScopeOrComparison( new OrRelationalScope().where(arg) )
+    project( new OrRelationalScope(), arg )
   }
   
   def and(arg) {
-    scope.addScopeOrComparison( new RelationalScope().where(arg) )
+    project( new RelationalScope(), arg )
   }
   
   def not(arg) {
-    scope.addScopeOrComparison( new NotRelationalScope().where(arg) )
+    project( new NotRelationalScope(), arg )
+  }
+  
+  def addScopeOrComparisonToCurrentScope(newScope) {
+    if ( scopeStack && !scopeStack.empty() ) {
+      scopeStack.peek().addScopeOrComparison(newScope)
+    } else {
+      scope.addScopeOrComparison(newScope)
+    }
+  }
+  
+  def project(newScope, Closure block) {
+    if (!scopeStack) { scopeStack = new Stack() }
+    scopeStack.push(newScope)
+    
+    block.call()
+    
+    addScopeOrComparisonToCurrentScope( scopeStack.pop() )
+  }
+  
+  def project(newScope, RelationalScope additionalScope) {
+    newScope.addScopeOrComparison(additionalScope)
+    addScopeOrComparisonToCurrentScope(newScope)
   }
   
   // Helper property for 'is' comparison
