@@ -44,8 +44,16 @@ will be a level of introspection into the logical expression generated that Crit
       klass.metaClass.static.blankScope = { ->
         return new RelationalScope(klass)
       }
+      
+      // Only install the defaultScope if the user has not already provided one
+      if (!klass.metaClass.getStaticMetaMethod("defaultScope")) {
+        klass.metaClass.defaultScope = { ->
+          return klass.blankScope()
+        }
+      }
+      
       klass.metaClass.static.where = { Closure block ->
-        klass.blankScope().where(block)
+        klass.defaultScope().where(block)
       }
     }
 
