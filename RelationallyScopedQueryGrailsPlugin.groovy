@@ -36,13 +36,14 @@ will be a level of introspection into the logical expression generated that Crit
 
     def doWithDynamicMethods = { context ->
       application.domainClasses.each { domainClass ->
-        installStaticMethods(domainClass.clazz)
+        installStaticMethods(domainClass)
       }
     }
     
-    def installStaticMethods(Class klass) {
+    def installStaticMethods(domainClass) {
+      Class klass = domainClass.clazz
       klass.metaClass.static.blankScope = { ->
-        return new RelationalScope(klass)
+        return new RelationalScope(domainClass)
       }
       
       // Only install the defaultScope if the user has not already provided one

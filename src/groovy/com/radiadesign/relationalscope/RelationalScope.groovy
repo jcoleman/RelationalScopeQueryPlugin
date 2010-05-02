@@ -1,12 +1,14 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 class RelationalScope {
   
   static sessionFactory
   
-  Class domain
+  DefaultGrailsDomainClass grailsDomainClass
+  
   def scopes = []
   
   def results
@@ -19,18 +21,18 @@ class RelationalScope {
     // Do nothing
   }
   
-  RelationalScope(Class _domain) {
-    domain = _domain
+  RelationalScope(DefaultGrailsDomainClass _grailsDomainClass) {
+    grailsDomainClass = _grailsDomainClass
   }
   
   //RelationalScope(JSONObject json) {
   //  
   //}
   
-  private RelationalScope(Class _domain, ArrayList _scopes) {
+  private RelationalScope(DefaultGrailsDomainClass _grailsDomainClass, ArrayList _scopes) {
     // Provides a deep copy of the stored scopes to ensure thread safety
     scopes = _scopes.clone()
-    domain = _domain
+    grailsDomainClass = _grailsDomainClass
   }
   
   
@@ -46,6 +48,7 @@ class RelationalScope {
   
   def where(Closure block) {
     def builder = new RelationalScopeBuilder(instance())
+    block = block.clone()
     block.delegate = builder
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
@@ -65,6 +68,10 @@ class RelationalScope {
     return propertyName
   }
   
+  Class getDomainKlass() {
+    return grailsDomainClass?.clazz
+  }
+  
   
   // --------------------------------------------------------------------------
   // Private API
@@ -72,7 +79,7 @@ class RelationalScope {
   
   def executeQuery() {
     def session = sessionFactory.currentSession
-    def criteria = session.createCriteria(domain).add(this.toCriterion())
+    def criteria = session.createCriteria(domainKlass).add(this.toCriterion())
     results = criteria.list()
   }
   
@@ -102,7 +109,7 @@ class RelationalScope {
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
-    return new RelationalScope(domain, scopes)
+    return new RelationalScope(grailsDomainClass, scopes)
   }
   
 }

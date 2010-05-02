@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 class OrRelationalScope extends RelationalScope {
   
@@ -12,16 +13,16 @@ class OrRelationalScope extends RelationalScope {
     super()
   }
   
-  OrRelationalScope(Class _domain) {
-    super(_domain)
+  OrRelationalScope(DefaultGrailsDomainClass _grailsDomainClass) {
+    super(_grailsDomainClass)
   }
   
   //OrRelationalScope(JSONObject json) {
   //  super(json)
   //}
   
-  private OrRelationalScope(Class _domain, ArrayList _scopes) {
-    super(_domain, _scopes)
+  private OrRelationalScope(_grailsDomainClass, ArrayList _scopes) {
+    super(_grailsDomainClass, _scopes)
   }
   
   
