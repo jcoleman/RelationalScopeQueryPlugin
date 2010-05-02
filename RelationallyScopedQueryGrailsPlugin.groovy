@@ -47,7 +47,7 @@ will be a level of introspection into the logical expression generated that Crit
       
       // Only install the defaultScope if the user has not already provided one
       if (!klass.metaClass.getStaticMetaMethod("defaultScope")) {
-        klass.metaClass.defaultScope = { ->
+        klass.metaClass.static.defaultScope = { ->
           return klass.blankScope()
         }
       }
