@@ -8,8 +8,9 @@ class GreaterThanScopeComparison extends ScopeComparisonBase {
     super(_propertyName, _comparisonValue)
   }
   
-  Criterion toCriterion() {
-    return Restrictions.gt(propertyName, comparisonValue)
+  Criterion toCriterion(criteria, associationPath, associationAliases) {
+    def property = fullPropertyNameFor(associationAliases, associationPath, propertyName)
+    return Restrictions.gt(property, comparisonValue)
   }
   
   String toString() {

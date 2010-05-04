@@ -14,33 +14,43 @@ class RelationalScopeBuilder {
   
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
+    
     args[0].each {
       addScopeOrComparisonToCurrentScope( ScopeComparisonFactory."${it.key}"(name, it.value) )
     }
   }
   
+  def propertyMissing(String name) {
+    def self = activeRelationalScope
+    return [ where: { Closure block ->
+      def relation = new RelationalScope(self.grailsDomainClass)
+      relation.associationName = name
+      project(relation , block )
+    } ]
+  }
+  
   def where(arg) {
-    project( new RelationalScope(), arg )
+    project( new RelationalScope(activeRelationalScope.grailsDomainClass), arg )
   }
   
   def or(arg) {
-    project( new OrRelationalScope(), arg )
+    project( new OrRelationalScope(activeRelationalScope.grailsDomainClass), arg )
   }
   
   def and(arg) {
-    project( new RelationalScope(), arg )
+    project( new RelationalScope(activeRelationalScope.grailsDomainClass), arg )
   }
   
   def not(arg) {
-    project( new NotRelationalScope(), arg )
+    project( new NotRelationalScope(activeRelationalScope.grailsDomainClass), arg )
+  }
+  
+  def getActiveRelationalScope() {
+    scopeStack && !scopeStack.empty() ? scopeStack.peek() : scope
   }
   
   def addScopeOrComparisonToCurrentScope(newScope) {
-    if ( scopeStack && !scopeStack.empty() ) {
-      scopeStack.peek().addScopeOrComparison(newScope)
-    } else {
-      scope.addScopeOrComparison(newScope)
-    }
+    activeRelationalScope.addScopeOrComparison(newScope)
   }
   
   def project(newScope, Closure block) {

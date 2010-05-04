@@ -8,8 +8,9 @@ class LessThanOrEqualScopeComparison extends ScopeComparisonBase {
     super(_propertyName, _comparisonValue)
   }
   
-  Criterion toCriterion() {
-    return Restrictions.le(propertyName, comparisonValue)
+  Criterion toCriterion(criteria, associationPath, associationAliases) {
+    def property = fullPropertyNameFor(associationAliases, associationPath, propertyName)
+    return Restrictions.le(property, comparisonValue)
   }
   
   String toString() {

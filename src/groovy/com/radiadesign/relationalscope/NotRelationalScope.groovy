@@ -9,10 +9,6 @@ class NotRelationalScope extends OrRelationalScope {
   // Constructors
   // --------------------------------------------------------------------------
   
-  NotRelationalScope() {
-    super()
-  }
-  
   NotRelationalScope(DefaultGrailsDomainClass _grailsDomainClass) {
     super(_grailsDomainClass)
   }
@@ -31,11 +27,11 @@ class NotRelationalScope extends OrRelationalScope {
   // --------------------------------------------------------------------------
   
   def instance() {
-    new NotRelationalScope()
+    new NotRelationalScope(grailsDomainClass)
   }
   
-  Criterion toCriterion() {
-    Restrictions.not(super.toCriterion())
+  Criterion toCriterion(criteria, associationPath, associationAliases) {
+    Restrictions.not(super.toCriterion(criteria, associationPath, associationAliases))
   }
   
 }

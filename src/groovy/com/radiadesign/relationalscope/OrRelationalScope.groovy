@@ -9,10 +9,6 @@ class OrRelationalScope extends RelationalScope {
   // Constructors
   // --------------------------------------------------------------------------
   
-  OrRelationalScope() {
-    super()
-  }
-  
   OrRelationalScope(DefaultGrailsDomainClass _grailsDomainClass) {
     super(_grailsDomainClass)
   }
@@ -31,7 +27,7 @@ class OrRelationalScope extends RelationalScope {
   // --------------------------------------------------------------------------
   
   def instance() {
-    new OrRelationalScope()
+    new OrRelationalScope(grailsDomainClass)
   }
   
   def junction() {

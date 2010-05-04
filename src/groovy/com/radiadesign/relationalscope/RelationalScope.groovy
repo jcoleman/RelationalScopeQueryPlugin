@@ -9,6 +9,7 @@ class RelationalScope {
   
   DefaultGrailsDomainClass grailsDomainClass
   
+  String associationName
   def scopes = []
   
   def results
@@ -16,10 +17,6 @@ class RelationalScope {
   // --------------------------------------------------------------------------
   // Constructors
   // --------------------------------------------------------------------------
-  
-  RelationalScope() {
-    // Do nothing
-  }
   
   RelationalScope(DefaultGrailsDomainClass _grailsDomainClass) {
     grailsDomainClass = _grailsDomainClass
@@ -64,10 +61,6 @@ class RelationalScope {
     scopes << additionalScope
   }
   
-  String fullPropertyNameFor(String propertyName) {
-    return propertyName
-  }
-  
   Class getDomainKlass() {
     return grailsDomainClass?.clazz
   }
@@ -79,7 +72,9 @@ class RelationalScope {
   
   def executeQuery() {
     def session = sessionFactory.currentSession
-    def criteria = session.createCriteria(domainKlass).add(this.toCriterion())
+    def criteria = session.createCriteria(domainKlass)
+    def criterion = this.toCriterion(criteria, associationName, [:])
+    criteria.add(criterion)
     results = criteria.list()
   }
   
@@ -88,18 +83,35 @@ class RelationalScope {
   }
   
   def instance() {
-    new RelationalScope()
+    new RelationalScope(grailsDomainClass)
   }
   
-  Criterion toCriterion() {
+  def fullAssociationPath(associationPath) {
+    if (associationName) {
+      return associationPath ? "${associationPath}.${associationName}" : associationName
+    } else {
+      return associationPath
+    }
+  }
+  
+  Criterion toCriterion(criteria, associationPath, associationAliases) {
+    def currentAssociationPath = fullAssociationPath(associationPath)
+    
+    // Do we need to create new alias?
+    if (associationName && !associationAliases[currentAssociationPath]) {
+      def alias = currentAssociationPath.replace('.', '_')
+      criteria.createAlias(currentAssociationPath, alias, CriteriaSpecification.LEFT_JOIN)
+      associationAliases[currentAssociationPath] = alias
+    }
+    
     if (scopes.size() == 1) {
       // If there is only one scope contained in this object then
       // just delegate to that scope.
-      return scopes.first().toCriterion()
+      return scopes.first().toCriterion(criteria, currentAssociationPath, associationAliases)
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
       scopes.inject(this.junction()) { criterion, scope ->
-        criterion.add(scope.toCriterion())
+        criterion.add(scope.toCriterion(criteria, currentAssociationPath, associationAliases))
       }
     } else {
       // There is no criteria to create.
