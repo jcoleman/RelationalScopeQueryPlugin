@@ -4,74 +4,78 @@ import com.radiadesign.relationalscope.comparison.*
 
 class RelationalScopeBuilder {
   
-  RelationalScope scope
+  RelationalScope _scope_
   
-  def scopeStack
+  def _scopeStack_
   
-  RelationalScopeBuilder(RelationalScope _scope) {
-    scope = _scope
+  RelationalScopeBuilder(RelationalScope scope) {
+    _scope_ = scope
   }
   
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     
     args[0].each {
-      addScopeOrComparisonToCurrentScope( ScopeComparisonFactory."${it.key}"(name, it.value) )
+      println "Adding scopeComparison: ${it.key} compared to: ${it.value}"
+      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(name, it.value) )
     }
   }
   
   def propertyMissing(String name) {
     def self = activeRelationalScope
-    return [ where: { Closure block ->
+    return [ where: { Object[] args ->
       def relation = new RelationalScope(self.grailsDomainClass)
       relation.associationName = name
-      project(relation , block )
+      _project_(relation , args)
     } ]
   }
   
-  def where(arg) {
-    project( new RelationalScope(activeRelationalScope.grailsDomainClass), arg )
+  def where(Object[] args) {
+    _project_( new RelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
   
-  def or(arg) {
-    project( new OrRelationalScope(activeRelationalScope.grailsDomainClass), arg )
+  def or(Object[] args) {
+    _project_( new OrRelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
   
-  def and(arg) {
-    project( new RelationalScope(activeRelationalScope.grailsDomainClass), arg )
+  def and(Object[] args) {
+    _project_( new RelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
   
-  def not(arg) {
-    project( new NotRelationalScope(activeRelationalScope.grailsDomainClass), arg )
+  def not(Object[] args) {
+    _project_( new NotRelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
   
   def getActiveRelationalScope() {
-    scopeStack && !scopeStack.empty() ? scopeStack.peek() : scope
+    _scopeStack_ && !_scopeStack_.empty() ? _scopeStack_.peek() : _scope_
   }
   
-  def addScopeOrComparisonToCurrentScope(newScope) {
+  def _addScopeOrComparisonToCurrentScope_(newScope) {
     activeRelationalScope.addScopeOrComparison(newScope)
   }
   
-  def project(newScope, Closure block) {
-    if (!scopeStack) { scopeStack = new Stack() }
-    scopeStack.push(newScope)
+  def _project_(newScope, Object[] args) {
+    if (!_scopeStack_) { _scopeStack_ = new Stack() }
+    _scopeStack_.push(newScope)
     
-    block.call()
+    args.each { arg ->
+      if (arg instanceof Closure) {
+        arg.call()
+      } else if (arg instanceof RelationalScope) {
+        _addScopeOrComparisonToCurrentScope_(arg)
+      } else {
+        throw new IllegalArgumentException("Expecting instance of either Closure or RelationalScope; instead got: ${arg?.getClass()}")
+      }
+    }
     
-    addScopeOrComparisonToCurrentScope( scopeStack.pop() )
-  }
-  
-  def project(newScope, RelationalScope additionalScope) {
-    newScope.addScopeOrComparison(additionalScope)
-    addScopeOrComparisonToCurrentScope(newScope)
+    _addScopeOrComparisonToCurrentScope_( _scopeStack_.pop() )
   }
   
   // Helper property for 'is' comparison
   final notNull = 1
   
   def getRelationalScope() {
-    return scope
+    return _scope_
   }
   
 }
