@@ -26,7 +26,7 @@ class RelationalScope {
   //  
   //}
   
-  private RelationalScope(DefaultGrailsDomainClass _grailsDomainClass, ArrayList _scopes) {
+  protected RelationalScope(DefaultGrailsDomainClass _grailsDomainClass, ArrayList _scopes) {
     // Provides a deep copy of the stored scopes to ensure thread safety
     scopes = _scopes.clone()
     grailsDomainClass = _grailsDomainClass
@@ -121,7 +121,7 @@ class RelationalScope {
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
-    return new RelationalScope(grailsDomainClass, scopes)
+    return this.class.newInstance(grailsDomainClass, scopes)
   }
   
 }
