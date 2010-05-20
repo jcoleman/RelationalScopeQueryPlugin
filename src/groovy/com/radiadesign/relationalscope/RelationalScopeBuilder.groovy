@@ -16,7 +16,6 @@ class RelationalScopeBuilder {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     
     args[0].each {
-      println "Adding scopeComparison: ${it.key} compared to: ${it.value}"
       _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(name, it.value) )
     }
   }
