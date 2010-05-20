@@ -53,8 +53,8 @@ will be a level of introspection into the logical expression generated that Crit
         }
       }
       
-      klass.metaClass.static.where = { Closure block ->
-        klass.defaultScope().where(block)
+      klass.metaClass.static.where = { arg ->
+        klass.defaultScope().where(arg)
       }
     }
 
