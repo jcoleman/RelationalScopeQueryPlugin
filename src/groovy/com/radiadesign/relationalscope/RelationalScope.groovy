@@ -12,7 +12,10 @@ class RelationalScope {
   String associationName
   def scopes = []
   
+  def result
+  def resultIsSet = false
   def results
+  def resultsIsSet = false
   
   // --------------------------------------------------------------------------
   // Constructors
@@ -52,6 +55,23 @@ class RelationalScope {
     return this.where(block.relationalScope)
   }
   
+  def all(forceRefresh=false) {
+    if (!resultsIsSet || forceRefresh) { executeQuery(false) }
+    return results
+  }
+  
+  def first(forceRefresh=false) {
+    if (all(forceRefresh).size() > 0) {
+      return all().first()
+    } else {
+      return null
+    }
+  }
+  
+  def find(forceRefresh=false) {
+    if (!resultIsSet || forceRefresh) { executeQuery(true) }
+    return result
+  }
   
   // --------------------------------------------------------------------------
   // Protected API (can be used by this package, should not be used externally)
@@ -70,12 +90,18 @@ class RelationalScope {
   // Private API
   // --------------------------------------------------------------------------
   
-  def executeQuery() {
+  def executeQuery(unique) {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass)
     def criterion = this.toCriterion(criteria, associationName, [:])
     criteria.add(criterion)
-    results = criteria.list()
+    if (unique) {
+      resultIsSet = true
+      result = criteria.uniqueResult()
+    } else {
+      resultsIsSet = true
+      results = criteria.list()
+    }
   }
   
   def junction() {
