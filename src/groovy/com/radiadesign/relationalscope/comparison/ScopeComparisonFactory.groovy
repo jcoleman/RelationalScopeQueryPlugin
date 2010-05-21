@@ -28,4 +28,8 @@ class ScopeComparisonFactory {
     new GreaterThanOrEqualScopeComparison(propertyName, value)
   }
   
+  static 'in'(String propertyName, value) {
+    new InScopeComparison(propertyName, value)
+  }
+  
 }
