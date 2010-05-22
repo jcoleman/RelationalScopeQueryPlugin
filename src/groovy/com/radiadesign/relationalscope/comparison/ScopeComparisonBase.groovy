@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
+import com.radiadesign.relationalscope.RelationalScope
 
 class ScopeComparisonBase {
   
@@ -14,12 +15,23 @@ class ScopeComparisonBase {
   
   String fullPropertyNameFor(Map options, String propertyName) {
     if (options.associationName) {
-      def alias = options.associationAliases[options.associationName]
+      def discriminator = RelationalScope.discriminatorFor(options)
+      def alias = options.associationAliases[discriminator][options.associationName]
       assert alias : "An association was used for which no alias has been created"
       return "${alias}.${propertyName}"
     } else {
       return propertyName
     }
+  }
+  
+  DetachedCriteria detachedCriteriaFor(RelationalScope comparisonValue, options) {
+    options.incrementDetachedCriteriaCount()
+    
+    def detachedCriteria = DetachedCriteria.forClass(comparisonValue.domainKlass, "sqrt_${options.getDetachedCriteriaCount()}")
+    detachedCriteria.setProjection(Projections.id())
+    def newOptions = options + [criteria: detachedCriteria, associationName: comparisonValue.associationName, isDetachedCriteria: true]
+    detachedCriteria.add( comparisonValue.toCriterion(newOptions) )
+    
   }
   
   Criterion toCriterion(criteria, associationPath, associationAliases) {

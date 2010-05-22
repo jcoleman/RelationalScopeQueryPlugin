@@ -17,6 +17,8 @@ class RelationalScope {
   def results
   def resultsIsSet = false
   
+  def detachedCriteriaCount = 0
+  
   // --------------------------------------------------------------------------
   // Constructors
   // --------------------------------------------------------------------------
@@ -95,7 +97,9 @@ class RelationalScope {
     def criteria = session.createCriteria(domainKlass)
     def criterion = this.toCriterion( [ criteria: criteria,
                                         associationName: associationName,
-                                        associationAliases: [:] ] )
+                                        associationAliases: [:],
+                                        getDetachedCriteriaCount: { -> return detachedCriteriaCount },
+                                        incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
     criteria.add(criterion)
     if (unique) {
       resultIsSet = true
@@ -122,15 +126,28 @@ class RelationalScope {
     }
   }
   
+  static discriminatorFor(options) {
+    options.isDetachedCriteria ? "sqjn_${options.getDetachedCriteriaCount()}" : 'rtjn'
+  }
+  
+  def createAssociationAliasIfNecessary(options, associationPath) {
+    def discriminator = RelationalScope.discriminatorFor(options)
+    if (!options.associationAliases[discriminator]) {
+      options.associationAliases[discriminator] = [:]
+    }
+    def aliasMap = options.associationAliases[discriminator]
+    if (associationName && !aliasMap[associationPath]) {
+      def alias = "${discriminator}_${associationPath.replace('.', '_')}"
+      options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
+      aliasMap[associationPath] = alias
+    }
+  }
+  
   Criterion toCriterion(options) {
     def currentAssociationPath = fullAssociationPath(options.associationPath)
     
     // Do we need to create new alias?
-    if (associationName && !options.associationAliases[currentAssociationPath]) {
-      def alias = currentAssociationPath.replace('.', '_')
-      options.criteria.createAlias(currentAssociationPath, alias, CriteriaSpecification.LEFT_JOIN)
-      options.associationAliases[currentAssociationPath] = alias
-    }
+    createAssociationAliasIfNecessary(options, currentAssociationPath)
     
     def newOptions = options + [associationName: currentAssociationPath]
     if (scopes.size() == 1) {
