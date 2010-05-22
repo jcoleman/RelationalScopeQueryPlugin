@@ -93,7 +93,9 @@ class RelationalScope {
   def executeQuery(unique) {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass)
-    def criterion = this.toCriterion(criteria, associationName, [:])
+    def criterion = this.toCriterion( [ criteria: criteria,
+                                        associationName: associationName,
+                                        associationAliases: [:] ] )
     criteria.add(criterion)
     if (unique) {
       resultIsSet = true
@@ -120,24 +122,25 @@ class RelationalScope {
     }
   }
   
-  Criterion toCriterion(criteria, associationPath, associationAliases) {
-    def currentAssociationPath = fullAssociationPath(associationPath)
+  Criterion toCriterion(options) {
+    def currentAssociationPath = fullAssociationPath(options.associationPath)
     
     // Do we need to create new alias?
-    if (associationName && !associationAliases[currentAssociationPath]) {
+    if (associationName && !options.associationAliases[currentAssociationPath]) {
       def alias = currentAssociationPath.replace('.', '_')
-      criteria.createAlias(currentAssociationPath, alias, CriteriaSpecification.LEFT_JOIN)
-      associationAliases[currentAssociationPath] = alias
+      options.criteria.createAlias(currentAssociationPath, alias, CriteriaSpecification.LEFT_JOIN)
+      options.associationAliases[currentAssociationPath] = alias
     }
     
+    def newOptions = options + [associationName: currentAssociationPath]
     if (scopes.size() == 1) {
       // If there is only one scope contained in this object then
       // just delegate to that scope.
-      return scopes.first().toCriterion(criteria, currentAssociationPath, associationAliases)
+      return scopes.first().toCriterion(newOptions)
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
       scopes.inject(this.junction()) { criterion, scope ->
-        criterion.add(scope.toCriterion(criteria, currentAssociationPath, associationAliases))
+        criterion.add( scope.toCriterion(newOptions) )
       }
     } else {
       // There is no criteria to create.

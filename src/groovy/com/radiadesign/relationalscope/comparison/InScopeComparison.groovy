@@ -1,6 +1,8 @@
 package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
+import com.radiadesign.relationalscope.RelationalScope
+import org.hibernate.criterion.DetachedCriteria
 
 class InScopeComparison extends ScopeComparisonBase {
   
@@ -8,17 +10,9 @@ class InScopeComparison extends ScopeComparisonBase {
     super(_propertyName, _comparisonValue)
   }
   
-  Criterion toCriterion(criteria, associationPath, associationAliases) {
-    def property = fullPropertyNameFor(associationAliases, associationPath, propertyName)
-    return criterionFor(property, _comparisonValue)
-  }
-  
-  def criterionFor(property, Object[] _comparisonValue) {
-    return Restrictions.(property, _comparisonValue)
-  }
-  
-  def criterionFor(property, Collection _comparisonValue) {
-    return Restrictions.(property, _comparisonValue)
+  Criterion toCriterion(options) {
+    def property = fullPropertyNameFor(options, propertyName)
+    return Restrictions.in(property, comparisonValue)
   }
   
   String toString() {

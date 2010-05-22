@@ -30,8 +30,10 @@ class NotRelationalScope extends OrRelationalScope {
     new NotRelationalScope(grailsDomainClass)
   }
   
-  Criterion toCriterion(criteria, associationPath, associationAliases) {
-    Restrictions.not(super.toCriterion(criteria, associationPath, associationAliases))
+  Criterion toCriterion(options) {
+    Restrictions.not( super.toCriterion( options.criteria,
+                                         associationPath,
+                                         options.associationAliases ) )
   }
   
 }
