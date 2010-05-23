@@ -94,10 +94,12 @@ class RelationalScope {
   
   def executeQuery(unique) {
     def session = sessionFactory.currentSession
-    def criteria = session.createCriteria(domainKlass)
+    def criteria = session.createCriteria(domainKlass, "root")
     def criterion = this.toCriterion( [ criteria: criteria,
+                                        currentRootAlias: "root",
                                         associationName: associationName,
                                         associationAliases: [:],
+                                        propertyMappings: [:],
                                         getDetachedCriteriaCount: { -> return detachedCriteriaCount },
                                         incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
     criteria.add(criterion)
@@ -126,17 +128,17 @@ class RelationalScope {
     }
   }
   
-  static discriminatorFor(options) {
+  static aliasDiscriminatorFor(options) {
     options.isDetachedCriteria ? "sqjn_${options.getDetachedCriteriaCount()}" : 'rtjn'
   }
   
   def createAssociationAliasIfNecessary(options, associationPath) {
     if (associationName) {
-      def discriminator = RelationalScope.discriminatorFor(options)
-      if (!options.associationAliases[discriminator]) {
-        options.associationAliases[discriminator] = [:]
-      }
+      def discriminator = RelationalScope.aliasDiscriminatorFor(options)
       def aliasMap = options.associationAliases[discriminator]
+      if (!aliasMap) {
+        aliasMap = options.associationAliases[discriminator] = [:]
+      }
       if (!aliasMap[associationPath]) {
         def alias = "${discriminator}_${associationPath.replace('.', '_')}"
         options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
@@ -159,7 +161,9 @@ class RelationalScope {
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
       scopes.inject(this.junction()) { criterion, scope ->
-        criterion.add( scope.toCriterion(newOptions) )
+        def additionalCriterion = scope.toCriterion(newOptions)
+        if (additionalCriterion) { criterion.add(additionalCriterion) }
+        return criterion
       }
     } else {
       // There is no criteria to create.

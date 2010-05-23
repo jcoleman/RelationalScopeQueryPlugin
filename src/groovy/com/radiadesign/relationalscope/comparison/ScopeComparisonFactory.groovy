@@ -32,4 +32,8 @@ class ScopeComparisonFactory {
     new InScopeComparison(propertyName, value)
   }
   
+  static mapTo(String propertyName, value) {
+    new PropertyMappingScopeComparison(propertyName, value)
+  }
+  
 }

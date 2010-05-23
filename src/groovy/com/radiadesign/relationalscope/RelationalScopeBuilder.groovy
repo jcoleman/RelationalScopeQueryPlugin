@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope
 
 import com.radiadesign.relationalscope.comparison.*
+import com.radiadesign.relationalscope.expression.*
 
 class RelationalScopeBuilder {
   
@@ -44,6 +45,11 @@ class RelationalScopeBuilder {
   def not(Object[] args) {
     _project_( new NotRelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
+  
+  def mapping(key) {
+    new MappedPropertyExpression(key)
+  }
+  
   
   def getActiveRelationalScope() {
     _scopeStack_ && !_scopeStack_.empty() ? _scopeStack_.peek() : _scope_
