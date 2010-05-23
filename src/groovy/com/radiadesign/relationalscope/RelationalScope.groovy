@@ -131,15 +131,17 @@ class RelationalScope {
   }
   
   def createAssociationAliasIfNecessary(options, associationPath) {
-    def discriminator = RelationalScope.discriminatorFor(options)
-    if (!options.associationAliases[discriminator]) {
-      options.associationAliases[discriminator] = [:]
-    }
-    def aliasMap = options.associationAliases[discriminator]
-    if (associationName && !aliasMap[associationPath]) {
-      def alias = "${discriminator}_${associationPath.replace('.', '_')}"
-      options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
-      aliasMap[associationPath] = alias
+    if (associationName) {
+      def discriminator = RelationalScope.discriminatorFor(options)
+      if (!options.associationAliases[discriminator]) {
+        options.associationAliases[discriminator] = [:]
+      }
+      def aliasMap = options.associationAliases[discriminator]
+      if (!aliasMap[associationPath]) {
+        def alias = "${discriminator}_${associationPath.replace('.', '_')}"
+        options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
+        aliasMap[associationPath] = alias
+      }
     }
   }
   
