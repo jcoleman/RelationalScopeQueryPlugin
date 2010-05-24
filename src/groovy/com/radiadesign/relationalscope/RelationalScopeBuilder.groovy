@@ -16,8 +16,12 @@ class RelationalScopeBuilder {
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     
-    args[0].each {
-      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(name, it.value) )
+    _processArgs_(name, args[0])
+  }
+  
+  def _processArgs_(property, argsMap) {
+    argsMap.each {
+      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
     }
   }
   
@@ -47,7 +51,7 @@ class RelationalScopeBuilder {
   }
   
   def mapping(key) {
-    new MappedPropertyExpression(key)
+    new MappedPropertyExpression(key, this)
   }
   
   

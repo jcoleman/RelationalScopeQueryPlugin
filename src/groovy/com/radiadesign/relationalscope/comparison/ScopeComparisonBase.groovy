@@ -2,13 +2,14 @@ package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
 import com.radiadesign.relationalscope.RelationalScope
+import com.radiadesign.relationalscope.expression.*
 
 class ScopeComparisonBase {
   
   def propertyName
   def comparisonValue
   
-  ScopeComparisonBase(String _propertyName, _comparisonValue) {
+  ScopeComparisonBase(_propertyName, _comparisonValue) {
     propertyName = _propertyName
     comparisonValue = _comparisonValue
   }
@@ -21,6 +22,14 @@ class ScopeComparisonBase {
       assert alias : "An association was used for which no alias has been created"
     }
     return "${alias ?: options.currentRootAlias}.${propertyName}"
+  }
+  
+  String aliasedPropertyNameFor(Map options, property) {
+    if (property instanceof MappedPropertyExpression) {
+      property.propertyFor(options)
+    } else {
+      fullPropertyNameFor(options, property)
+    }
   }
   
   DetachedCriteria detachedCriteriaFor(RelationalScope comparisonValue, options) {
