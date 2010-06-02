@@ -54,6 +54,10 @@ class RelationalScopeBuilder {
     new MappedPropertyExpression(key, this)
   }
   
+  def property(key) {
+    new LocalPropertyExpression(key, this)
+  }
+  
   
   def getActiveRelationalScope() {
     _scopeStack_ && !_scopeStack_.empty() ? _scopeStack_.peek() : _scope_

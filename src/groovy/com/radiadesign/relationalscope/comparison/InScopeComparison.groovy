@@ -2,6 +2,7 @@ package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
 import com.radiadesign.relationalscope.RelationalScope
+import com.radiadesign.relationalscope.expression.*
 
 class InScopeComparison extends ScopeComparisonBase {
   
@@ -10,7 +11,7 @@ class InScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    def property = fullPropertyNameFor(options, propertyName)
+    def property = LocalPropertyExpression.fullPropertyNameFor(options, propertyName)
     if (comparisonValue instanceof RelationalScope) {
       return Subqueries.propertyIn( property, detachedCriteriaFor(comparisonValue, options) )
     } else {
