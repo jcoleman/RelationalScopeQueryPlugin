@@ -10,8 +10,12 @@ class LessThanOrEqualScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    def property = LocalPropertyExpression.fullPropertyNameFor(options, propertyName)
-    return Restrictions.le(property, comparisonValue)
+    def property = LocalPropertyExpression.aliasedPropertyNameFor(options, propertyName)
+    if (comparisonValue instanceof LocalPropertyExpression) {
+      return Restrictions.leProperty( property, comparisonValue.propertyFor(options) )
+    } else {
+      return Restrictions.le(property, comparisonValue)
+    }
   }
   
   String toString() {
