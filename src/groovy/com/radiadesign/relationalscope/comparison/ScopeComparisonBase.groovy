@@ -14,24 +14,6 @@ class ScopeComparisonBase {
     comparisonValue = _comparisonValue
   }
   
-  String fullPropertyNameFor(Map options, String propertyName) {
-    def alias
-    if (options.associationName) {
-      def discriminator = RelationalScope.aliasDiscriminatorFor(options)
-      alias = options.associationAliases[discriminator][options.associationName]
-      assert alias : "An association was used for which no alias has been created"
-    }
-    return "${alias ?: options.currentRootAlias}.${propertyName}"
-  }
-  
-  String aliasedPropertyNameFor(Map options, property) {
-    if (property instanceof MappedPropertyExpression) {
-      property.propertyFor(options)
-    } else {
-      fullPropertyNameFor(options, property)
-    }
-  }
-  
   DetachedCriteria detachedCriteriaFor(RelationalScope comparisonValue, options) {
     options.incrementDetachedCriteriaCount()
     

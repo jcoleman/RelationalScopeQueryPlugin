@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
+import com.radiadesign.relationalscope.expression.*
 
 class LessThanScopeComparison extends ScopeComparisonBase {
   
@@ -9,8 +10,12 @@ class LessThanScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    def property = fullPropertyNameFor(options, propertyName)
-    return Restrictions.lt(property, comparisonValue)
+    def property = LocalPropertyExpression.aliasedPropertyNameFor(options, propertyName)
+    if (comparisonValue instanceof LocalPropertyExpression) {
+      return Restrictions.ltProperty( property, comparisonValue.propertyFor(options) )
+    } else {
+      return Restrictions.lt(property, comparisonValue)
+    }
   }
   
   String toString() {
