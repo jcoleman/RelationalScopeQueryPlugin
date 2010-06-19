@@ -1,6 +1,7 @@
 require 'net/http'
 require 'json'
 require 'fileutils'
+require 'pp'
 
 module Grails
   class Application
@@ -27,7 +28,7 @@ module Grails
                 def result = Eval.me("grailsApplication", grailsApplication, source)
                 render([result: result] as JSON)
               } catch (e) {
-                render([error: e.message, stackTrace: e.stackTrace.join("\\n")] as JSON)
+                render([error: e.message, stackTrace: e.stackTrace.collect { it.toString() }] as JSON)
               }
 
             }
@@ -56,7 +57,15 @@ module Grails
         log "Response:\n\t#{response.body}\n"
         
         result = JSON.parse(response.body)
-        raise "Execution failed:\n#{result['error']}\n#{result['stackTrace']}" if result['error']
+        
+        if result['error']
+          pp result['stackTrace']
+          cleaned_stack = result['stackTrace'].find_all do |line|
+            line =~ /com.radia/
+          end.join("\n")
+          
+          raise "Execution failed:\n#{result['error']}\n#{cleaned_stack}"
+        end
         
         return result['result']
       end
