@@ -6,11 +6,10 @@ import com.radiadesign.relationalscope.RelationalScope
 class AbstractPropertyExpressionBase extends ExpressionBase {
   
   def propertyKey
-  def builder
   
   AbstractPropertyExpressionBase(_propertyKey, RelationalScopeBuilder _builder) {
+    super(_builder)
     propertyKey = _propertyKey
-    builder = _builder
   }
   
   static String fullPropertyNameFor(Map options, String propertyName) {
@@ -33,10 +32,6 @@ class AbstractPropertyExpressionBase extends ExpressionBase {
   
   def propertyFor(options) {
     throw new UnsupportedOperationException("Please implement propertyFor() in the extending class.")
-  }
-  
-  def call = { Map args ->
-    builder._processArgs_(this, args)
   }
   
 }
