@@ -32,7 +32,7 @@ class AbstractPropertyExpressionBase extends ExpressionBase {
   }
   
   def propertyFor(options) {
-    throw new Exception("Please implement propertyFor() in the extending class.")
+    throw new UnsupportedOperationException("Please implement propertyFor() in the extending class.")
   }
   
   def call = { Map args ->
