@@ -20,22 +20,22 @@ class RelationalScopeBuilder {
   }
   
   def _processArgs_(property, argsMap) {
+    def currentDomainClass = activeRelationalScope.grailsDomainClass
+    if (!currentDomainClass.hasPersistentProperty(property)) {
+      throw new RuntimeException("Domain class '${currentDomainClass.name}' does not contain a persistent property '${property}'. Perhaps you have a typo in your relational query?" as String)
+    }
+    
     argsMap.each {
-      try {
-        _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
-      } catch (MissingMethodException ex) {
-        throw new UnsupportedOperationException("'${it.key}' is not a valid comparator. Perhaps you have a typo in your relational query?" as String)
+      if (it.key == 'where') {
+        _projectAssociation_(property, it.value)
+      } else {
+        try {
+          _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
+        } catch (MissingMethodException ex) {
+          throw new RuntimeException("'${it.key}' is not a valid comparator. Perhaps you have a typo in your relational query?" as String)
+        }
       }
     }
-  }
-  
-  def propertyMissing(String name) {
-    def self = activeRelationalScope
-    return [ where: { Object[] args ->
-      def relation = new RelationalScope(self.grailsDomainClass)
-      relation.associationName = name
-      _project_(relation , args)
-    } ]
   }
   
   def where(Object[] args) {
@@ -86,6 +86,18 @@ class RelationalScopeBuilder {
     }
     
     _addScopeOrComparisonToCurrentScope_( _scopeStack_.pop() )
+  }
+  
+  def _projectAssociation_(associationName, Object[] args) {
+    def currentDomainClass = activeRelationalScope.grailsDomainClass
+    def domainProperty = currentDomainClass.getPropertyByName(associationName)
+    if (!domainProperty.isAssociation()) {
+      throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${property}' is not an association and cannot be used with the 'where' comparator in a relational query?" as String)
+    }
+    
+    def relation = new RelationalScope(domainProperty.getReferencedDomainClass())
+    relation.associationName = associationName
+    _project_(relation , args)
   }
   
   // Helper property for 'is' comparison

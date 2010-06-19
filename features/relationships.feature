@@ -58,7 +58,7 @@ Feature: Relationship queries
     When I execute the following code:
       """
       MarriedPerson.where {
-        spouse.where {
+        spouse where: {
           age gte: 25
         }
       }.all()
@@ -119,7 +119,7 @@ Feature: Relationship queries
       """
       FriendlyPerson.where {
         gender mapTo: "friend_gender"
-        bestFriend.where {
+        bestFriend where: {
           gender equals: mapping("friend_gender")
         }
       }.all()

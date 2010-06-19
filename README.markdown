@@ -17,7 +17,7 @@ More complex features:
 
     TestDomain.where {
      // 't' is a single relationship to another TestDomain
-     t.where {
+     t where: {
        id gte: 1 as Long
      }
     }
@@ -28,7 +28,7 @@ More complex features:
 
     TestDomain.where {
      id mapTo: "parent_query_id"
-     t.where {
+     t where: {
        id equals: mapping("parent_query_id")
      }
     }
