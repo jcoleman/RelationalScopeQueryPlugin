@@ -10,7 +10,7 @@ class IsScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    def property = LocalPropertyExpression.fullPropertyNameFor(options, propertyName)
+    def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
     if (comparisonValue == null) {
       return Restrictions.isNull(property)
     } else {

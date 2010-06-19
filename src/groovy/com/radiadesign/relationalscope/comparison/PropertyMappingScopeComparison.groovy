@@ -10,7 +10,7 @@ class PropertyMappingScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    def property = LocalPropertyExpression.fullPropertyNameFor(options, propertyName)
+    def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
     options.propertyMappings[comparisonValue] = property
     return null
   }

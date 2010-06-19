@@ -11,6 +11,7 @@ class RelationallyScopedQueryGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
+    def observes = ["domain"]
 
     // TODO Fill in these fields
     def author = "James Coleman"
@@ -66,6 +67,10 @@ will be a level of introspection into the logical expression generated that Crit
         // TODO Implement code that is executed when any artefact that this plugin is
         // watching is modified and reloaded. The event contains: event.source,
         // event.application, event.manager, event.ctx, and event.plugin.
+        application.domainClasses.each { domainClass ->
+          installStaticMethods(domainClass)
+        }
+        RelationalScope.sessionFactory = event.ctx.sessionFactory
     }
 
     def onConfigChange = { event ->
