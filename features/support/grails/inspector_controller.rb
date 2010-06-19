@@ -1,11 +1,15 @@
 require 'net/http'
 require 'json'
+require 'fileutils'
 
 module Grails
   class Application
     module InspectorController
       def install_inspector_controller_in(root)
-        name = File.join( root.path, "grails-app", "controllers", "InspectorController.groovy" )
+        location = File.join( root.path, "grails-app", "controllers" )
+        FileUtils.mkdir_p(location)
+        
+        name = File.join(location, "InspectorController.groovy")
         file = File.new(name, "w")
     
         file.write <<-EOD

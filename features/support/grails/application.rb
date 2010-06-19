@@ -4,16 +4,19 @@ module Grails
   class Application
     attr_reader :root
     attr_accessor :domain_classes
+    attr_accessor :verbose
     
     include InspectorController
     
-    def initialize(directory)
+    def initialize(directory, verbose=false)
       # We need something File-like
       @root = File.open(directory) unless directory.respond_to?(:path)
       
       # One day it'd be nice to parse existing classes
       @domain_classes = []
       @frozen_domain_classes = []
+      
+      @verbose = verbose
       
       @output = ""
     end
@@ -132,7 +135,7 @@ module Grails
     protected
     
     def log(message)
-      puts "==> #{message}"
+      puts "==> #{message}" if @verbose
     end
   end
 end

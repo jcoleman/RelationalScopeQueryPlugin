@@ -16,7 +16,7 @@ task :grails do
 
   # Create a GrailsApplication instance for the directory
   # where the tests are being run
-  grails = Grails::Application.new(Dir.pwd)
+  grails = Grails::Application.new(Dir.pwd, true)
 
   # start up the DRb service
   DRb.start_service "druby://localhost:10808", grails
