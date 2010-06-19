@@ -118,7 +118,7 @@ Feature: Relationship queries
     When I execute the following code:
       """
       FriendlyPerson.where {
-        gender mapTo("friend_gender")
+        gender mapTo: "friend_gender"
         bestFriend.where {
           gender equal: mapping("friend_gender")
         }
