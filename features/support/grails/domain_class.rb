@@ -2,6 +2,7 @@ module Grails
   class DomainClass
     attr_reader :source
     attr_reader :unique_hash
+    attr_accessor :application
     
     def initialize(source)
       @source = source
@@ -20,12 +21,20 @@ module Grails
     
     # Write the code for this domain to a file, in preparation for 
     # running the application.
-    def write_to(root)
-      path = File.join(root.path, "grails-app", "domain", "#{name}.groovy")
+    def write_file!
       file = File.new( path, "w")
       
       file.write(@source)
       file.close
+    end
+    
+    def path
+      File.join(self.application.root.path, "grails-app", "domain", "#{name}.groovy")
+    end
+    
+    def delete_file!
+      puts "Deleting #{path}"
+      File.delete(path) if File.exists?(path)
     end
     
     def ==(other)

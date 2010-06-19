@@ -29,7 +29,6 @@ module Grails
       ready = @output.include? "Server running."
       Thread.critical = false
       
-      # update_output! unless ready
       return ready
     end
     
@@ -39,6 +38,7 @@ module Grails
     end
     
     def add_domain_class(klass)
+      klass.application = self
       @domain_classes << klass unless @domain_classes.include?(klass)
     end
     
@@ -70,7 +70,7 @@ module Grails
       # We need to dump all our _new or changed_ domain classes to actual files
       domain_changes.each do |domain|
         log "Writing #{domain.name} to disk..."
-        domain.write_to @root
+        domain.write_file!
       end
       
       @frozen_domain_classes = domain_classes.clone
@@ -120,11 +120,16 @@ module Grails
       end
     end
     
-    protected
-    
-    def update_output!
-      @output << (@pipe.gets || "")
+    def clean_files!
+      domain_classes.each do |domain|
+        domain.delete_file!
+      end
+      
+      inspector_path = File.join( root.path, "grails-app", "controllers", "InspectorController.groovy" )
+      File.delete(inspector_path) if File.exists?(inspector_path)
     end
+    
+    protected
     
     def log(message)
       puts "==> #{message}"
