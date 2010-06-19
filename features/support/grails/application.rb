@@ -132,6 +132,11 @@ module Grails
       File.delete(inspector_path) if File.exists?(inspector_path)
     end
     
+    def shutdown!
+      stop!
+      clean_files!
+    end
+    
     protected
     
     def log(message)

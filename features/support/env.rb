@@ -48,5 +48,5 @@ After do |scenario|
 end
 
 at_exit do
-  grails.stop! if grails.running? && run_locally
+  grails.shutdown! if grails.running? && run_locally
 end

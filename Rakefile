@@ -28,8 +28,7 @@ task :grails do
   begin
     DRb.thread.join
   rescue Interrupt
-    grails.stop!
-    grails.clean_files!
+    grails.shutdown!
   end
 end
 
