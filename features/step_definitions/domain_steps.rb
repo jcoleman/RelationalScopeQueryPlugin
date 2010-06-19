@@ -84,7 +84,7 @@ When /^I execute the following code:$/ do |code|
   @result = @grails.execute code
 end
 
-Then /^I should get the following results:$/ do |instances|
+Then /^I should get the following results(, in order)?:$/ do |order, instances|
   # We only care about certain columns
   columns = instances.raw.first.inspect
   
@@ -93,5 +93,5 @@ Then /^I should get the following results:$/ do |instances|
     instance.reject { |key, value| !columns.include? key }
   end
   
-  thinned_result.should == instances.hashes
+  Set.new(thinned_result) == Set.new(instances.hashes)
 end

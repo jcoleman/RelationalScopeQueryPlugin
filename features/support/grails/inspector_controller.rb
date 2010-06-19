@@ -49,7 +49,7 @@ module Grails
 
         response = server.request(request)
         
-        #puts "Response:\n\t#{response.body}"
+        log "Response:\n\t#{response.body}\n"
         
         result = JSON.parse(response.body)
         raise "Execution failed:\n#{result['error']}" if result['error']
