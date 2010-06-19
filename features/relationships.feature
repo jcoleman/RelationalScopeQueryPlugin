@@ -120,7 +120,7 @@ Feature: Relationship queries
       FriendlyPerson.where {
         gender mapTo: "friend_gender"
         bestFriend.where {
-          gender equal: mapping("friend_gender")
+          gender equals: mapping("friend_gender")
         }
       }.all()
       """
