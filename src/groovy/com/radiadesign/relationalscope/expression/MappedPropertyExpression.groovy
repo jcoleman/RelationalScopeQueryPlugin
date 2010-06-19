@@ -9,7 +9,12 @@ class MappedPropertyExpression extends AbstractPropertyExpressionBase {
   }
   
   def propertyFor(options) {
-    options.propertyMappings[propertyKey]
+    def property = options.propertyMappings[propertyKey]
+    if (property) {
+      return property
+    } else {
+      throw new RuntimeException("Mapping '${propertyKey}' does't (yet) exist in this query. Perhaps you have a typo in your relational query?" as String)
+    }
   }
   
 }
