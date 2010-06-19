@@ -3,6 +3,7 @@ require "json"
 require "spec"
 require "set"
 require "drb"
+require "pp"
 
 require File.join( File.dirname(__FILE__), "grails/grails" )
 
@@ -17,6 +18,26 @@ else
 
   # attach to the DRb server via a URI given on the command line
   grails = DRbObject.new nil, "druby://localhost:10808"
+end
+
+module Kernel
+  alias_method :old_puts, :puts
+  def puts(text)
+    old_puts "<pre>#{text}</pre>"
+  end
+  
+  alias_method :old_pp, :pp
+  def pp(object)
+    old_puts "<pre>"
+    old_pp object
+    old_puts "</pre>"
+  end
+end
+
+class String
+  def first_letter_capitalize
+    self.chars.inject("") { |m, c| m << (m.empty? ? c.upcase : c) }
+  end
 end
 
 raise "You need to specify a GRAILS_HOME in order to run the tests." unless grails.executable && File.exist?(grails.executable)

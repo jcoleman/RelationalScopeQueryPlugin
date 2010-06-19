@@ -1,4 +1,4 @@
-# Fancier: require 'open3'
+require 'open3'
 
 module Grails
   class Application
@@ -25,8 +25,11 @@ module Grails
     def ready?
       return false unless running?
       
+      Thread.critical = true
       ready = @output.include? "Server running."
-      update_output! unless ready
+      Thread.critical = false
+      
+      # update_output! unless ready
       return ready
     end
     
@@ -77,7 +80,7 @@ module Grails
       Dir.chdir(@root.path)
       
       # Fancier:
-      # @pipe, @pipe_out, @pipe_error = Open3.popen3("#{grails_executable} run-app", "r")
+      #@pipe, @pipe_out, @pipe_error = Open3.popen3("#{executable} run-app", "r")
       
       log "Starting Grails."
       @pipe = IO.popen("#{executable} run-app", "r")
@@ -86,6 +89,17 @@ module Grails
       # If Grails hasn't said hello yet, something is wrong
       if @pipe.eof?
         raise Exception.new("Unable to start Grails. You may need to set your GRAILS_HOME environment variable.")
+      end
+
+      @output_watcher = Thread.new do
+        Thread.current.abort_on_exception = true
+
+        while(( line = @pipe.gets ))
+          Thread.critical = true
+          @output << line
+          log "Grails: #{line}"
+          Thread.critical = false
+        end
       end
     end
     
@@ -96,7 +110,8 @@ module Grails
     def stop!
       if running?
         log "Terminating Grails..."
-      
+        
+        @output_watcher.exit
         Process.kill("TERM", @pipe.pid)
         @pipe.close
         @output = ""
