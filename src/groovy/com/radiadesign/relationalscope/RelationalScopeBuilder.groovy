@@ -21,7 +21,11 @@ class RelationalScopeBuilder {
   
   def _processArgs_(property, argsMap) {
     argsMap.each {
-      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
+      try {
+        _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
+      } catch (MissingMethodException ex) {
+        throw new UnsupportedOperationException("'${it.key}' is not a valid comparator. Perhaps you have a typo in your relational query?" as String)
+      }
     }
   }
   
