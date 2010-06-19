@@ -27,7 +27,7 @@ module Grails
                 def result = Eval.me("grailsApplication", grailsApplication, source)
                 render([result: result] as JSON)
               } catch (e) {
-                render([error: e.message] as JSON)
+                render([error: e.message, stackTrace: e.stackTrace.join("\\n")] as JSON)
               }
 
             }
@@ -56,7 +56,7 @@ module Grails
         log "Response:\n\t#{response.body}\n"
         
         result = JSON.parse(response.body)
-        raise "Execution failed:\n#{result['error']}" if result['error']
+        raise "Execution failed:\n#{result['error']}\n#{result['stackTrace']}" if result['error']
         
         return result['result']
       end

@@ -67,3 +67,64 @@ Feature: Relationship queries
       | name    |
       | Nancy   |
       | Harold  |
+  
+  Scenario: Query using a map
+    Given I have the following domain class:
+      """
+      class FriendlyPerson {
+        String name
+        String gender
+        FriendlyPerson bestFriend
+        
+        static constraints = {
+          gender(nullable: true)
+          bestFriend(nullable: true)
+        }
+      }
+      """
+    And I have created the following "FriendlyPerson" graph:
+      """
+        [
+          {
+            "name": "Harold",
+            "gender": "male",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Maude"
+            }
+          },
+          {
+            "name": "Maude",
+            "gender": "female"
+          },
+          {
+            "name": "Jeff",
+            "gender": "male",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Harold"
+            }
+          },
+          {
+            "name": "Nancy",
+            "gender": "female",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Maude"
+            }
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        gender mapTo("friend_gender")
+        bestFriend.where {
+          gender equal: mapping("friend_gender")
+        }
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Nancy   |
+      | Harold  |
