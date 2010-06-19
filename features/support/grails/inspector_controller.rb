@@ -1,10 +1,15 @@
 require 'net/http'
+require 'json'
+require 'fileutils'
 
 module Grails
   class Application
     module InspectorController
       def install_inspector_controller_in(root)
-        name = File.join( root.path, "grails-app", "controllers", "InspectorController.groovy" )
+        location = File.join( root.path, "grails-app", "controllers" )
+        FileUtils.mkdir_p(location)
+        
+        name = File.join(location, "InspectorController.groovy")
         file = File.new(name, "w")
     
         file.write <<-EOD
@@ -22,7 +27,7 @@ module Grails
                 def result = Eval.me("grailsApplication", grailsApplication, source)
                 render([result: result] as JSON)
               } catch (e) {
-                render([error: e.message] as JSON)
+                render([error: e.message, stackTrace: e.stackTrace.collect { it.toString() }] as JSON)
               }
 
             }
@@ -33,6 +38,7 @@ module Grails
       end
   
       def execute(code)
+        restart if needs_restart?
         until ready?
           sleep(0.1)
         end
@@ -40,15 +46,24 @@ module Grails
         uri = URI.parse base_uri
         server = Net::HTTP.new(uri.host, uri.port)
         
+        log "Executing code: \n#{code}\n"
+        
         request = Net::HTTP::Post.new("#{base_uri}/inspector/execute")
         request.set_form_data({ :source => code })
 
         response = server.request(request)
         
-        #puts "Response:\n\t#{response.body}"
+        log "Response:\n\t#{response.body}\n"
         
         result = JSON.parse(response.body)
-        raise "Execution failed:\n#{result['error']}" if result['error']
+        
+        if result['error']
+          cleaned_stack = result['stackTrace'].find_all do |line|
+            line =~ /com.radia/
+          end.join("\n")
+          
+          raise "Execution failed:\n#{result['error']}\n#{cleaned_stack}"
+        end
         
         return result['result']
       end

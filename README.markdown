@@ -40,3 +40,17 @@ More complex features:
        property("id") equals: property("id")
      }
     }
+
+Running the Tests
+=================
+
+You can run the Cucumber test suite the slow way by simply typing
+
+    rake
+
+at the console, or by using the Cucumber bundle for TextMate. However,
+this starts Grails each time you run the test suite. For faster development, start a dedicated Grails daemon by typing
+
+    rake grails
+    
+in a separate console. You can then run your tests as often as you like, and Grails will not restart unless you add or change a domain class specification in the tests.

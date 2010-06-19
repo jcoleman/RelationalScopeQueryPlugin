@@ -1,22 +1,26 @@
-# Fancier: require 'open3'
+require 'open3'
 
 module Grails
   class Application
     attr_reader :root
     attr_accessor :domain_classes
+    attr_accessor :verbose
     
     include InspectorController
     
-    def initialize(directory)
+    def initialize(directory, verbose=false)
       # We need something File-like
       @root = File.open(directory) unless directory.respond_to?(:path)
       
-      # One day it'd be nice to load existing classes
+      # One day it'd be nice to parse existing classes
       @domain_classes = []
+      @frozen_domain_classes = []
+      
+      @verbose = verbose
       
       @output = ""
     end
-    
+
     def running?
       !!(@pipe)
     end
@@ -24,8 +28,10 @@ module Grails
     def ready?
       return false unless running?
       
+      Thread.critical = true
       ready = @output.include? "Server running."
-      update_output! unless ready
+      Thread.critical = false
+      
       return ready
     end
     
@@ -34,25 +40,69 @@ module Grails
       return @output.scan(/^Server running\. Browse to (.+)/).first[0]
     end
     
+    def add_domain_class(klass)
+      klass.application = self
+      @domain_classes << klass unless @domain_classes.include?(klass)
+    end
+    
+    def needs_restart?
+      !running? || domain_changes?
+    end
+    
+    def domain_changes?
+      domain_changes.size > 0
+    end
+    
+    def domain_changes
+      (domain_classes - @frozen_domain_classes)
+    end
+    
+    def restart
+      log "Performing a restart."
+      
+      stop! if running?
+      run!
+    end
+    
     def run!
-      # We need to dump all our domain classes to actual files
-      domain_classes.each do |domain|
-        domain.write_to @root
+      log "Currently loaded domain classes: #{@frozen_domain_classes}"
+      log "Need to load: #{domain_changes}"
+      
+      return unless domain_changes? || !running?
+      
+      # We need to dump all our _new or changed_ domain classes to actual files
+      domain_changes.each do |domain|
+        log "Writing #{domain.name} to disk..."
+        domain.write_file!
       end
+      
+      @frozen_domain_classes = domain_classes.clone
       
       install_inspector_controller_in(@root)
       
       Dir.chdir(@root.path)
       
       # Fancier:
-      # @pipe, @pipe_out, @pipe_error = Open3.popen3("#{grails_executable} run-app", "r")
+      #@pipe, @pipe_out, @pipe_error = Open3.popen3("#{executable} run-app", "r")
       
+      log "Starting Grails."
       @pipe = IO.popen("#{executable} run-app", "r")
       
       sleep(1)
       # If Grails hasn't said hello yet, something is wrong
       if @pipe.eof?
         raise Exception.new("Unable to start Grails. You may need to set your GRAILS_HOME environment variable.")
+      end
+
+      @output_watcher = Thread.new do
+        Thread.current.abort_on_exception = true
+
+        while(( line = @pipe.gets ))
+          Thread.critical = true
+          @output << line
+          log "Grails: #{line}"
+          Thread.critical = false
+        end
       end
     end
     
@@ -61,17 +111,36 @@ module Grails
     end
     
     def stop!
-      Process.kill("TERM", @pipe.pid)
-      @pipe.close
-      @output = ""
+      if running?
+        log "Terminating Grails..."
+        
+        @output_watcher.exit
+        Process.kill("TERM", @pipe.pid)
+        @pipe.close
+        @output = ""
       
-      @pipe = nil
+        @pipe = nil
+      end
+    end
+    
+    def clean_files!
+      domain_classes.each do |domain|
+        domain.delete_file!
+      end
+      
+      inspector_path = File.join( root.path, "grails-app", "controllers", "InspectorController.groovy" )
+      File.delete(inspector_path) if File.exists?(inspector_path)
+    end
+    
+    def shutdown!
+      stop!
+      clean_files!
     end
     
     protected
     
-    def update_output!
-      @output << (@pipe.gets || "")
+    def log(message)
+      puts "==> #{message}" if @verbose
     end
   end
 end
