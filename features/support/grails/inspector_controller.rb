@@ -1,7 +1,6 @@
 require 'net/http'
 require 'json'
 require 'fileutils'
-require 'pp'
 
 module Grails
   class Application
@@ -59,7 +58,6 @@ module Grails
         result = JSON.parse(response.body)
         
         if result['error']
-          pp result['stackTrace']
           cleaned_stack = result['stackTrace'].find_all do |line|
             line =~ /com.radia/
           end.join("\n")
