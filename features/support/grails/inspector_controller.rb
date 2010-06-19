@@ -1,4 +1,5 @@
 require 'net/http'
+require 'json'
 
 module Grails
   class Application
@@ -33,12 +34,15 @@ module Grails
       end
   
       def execute(code)
+        restart if needs_restart?
         until ready?
           sleep(0.1)
         end
         
         uri = URI.parse base_uri
         server = Net::HTTP.new(uri.host, uri.port)
+        
+        log "Executing code: \n#{code}\n"
         
         request = Net::HTTP::Post.new("#{base_uri}/inspector/execute")
         request.set_form_data({ :source => code })

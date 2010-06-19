@@ -1,11 +1,8 @@
 Given /^I have the following domain class:$/ do |code|
-  @grails.stop! if @grails.running?
-  @grails.domain_classes << Grails::DomainClass.new(code)
+  @grails.add_domain_class Grails::DomainClass.new(code)
 end
 
 Given /^I have created the following "([^\"]*)" instances:$/ do |klass, instances|
-  @grails.run! unless @grails.running?
-  
   instances.hashes.each do |instance|
     # If the instance has a parent reference, it needs to be
     # called out. As Ryan says… make some grand assumptions.
