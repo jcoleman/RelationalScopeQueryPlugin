@@ -13,7 +13,10 @@ class InScopeComparison extends ScopeComparisonBase {
   Criterion toCriterion(options) {
     def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
     if (comparisonValue instanceof RelationalScope) {
-      return Subqueries.propertyIn( property, detachedCriteriaFor(comparisonValue, options) )
+      def criteria = detachedCriteriaFor(comparisonValue, options) { criteria ->
+        criteria.setProjection(Projections.id())
+      }
+      return Subqueries.propertyIn(property, criteria)
     } else {
       return Restrictions.in(property, comparisonValue)
     }

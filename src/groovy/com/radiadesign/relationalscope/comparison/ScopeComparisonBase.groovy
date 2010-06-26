@@ -14,12 +14,14 @@ class ScopeComparisonBase {
     comparisonValue = _comparisonValue
   }
   
-  DetachedCriteria detachedCriteriaFor(RelationalScope comparisonValue, options) {
+  DetachedCriteria detachedCriteriaFor(RelationalScope comparisonValue, options, criteriaCallback=null) {
     options.incrementDetachedCriteriaCount()
     
     def rootAlias = "sqrt_${options.getDetachedCriteriaCount()}"
     def detachedCriteria = DetachedCriteria.forClass(comparisonValue.domainKlass, rootAlias)
-    detachedCriteria.setProjection(Projections.id())
+    
+    criteriaCallback?.call(detachedCriteria)
+    
     def newOptions = options + [ criteria: detachedCriteria,
                                  associationName: comparisonValue.associationName,
                                  isDetachedCriteria: true,
