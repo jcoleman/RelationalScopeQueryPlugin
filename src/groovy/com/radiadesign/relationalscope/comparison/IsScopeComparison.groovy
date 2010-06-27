@@ -5,21 +5,24 @@ import com.radiadesign.relationalscope.expression.*
 
 class IsScopeComparison extends ScopeComparisonBase {
   
-  IsScopeComparison(String _propertyName, _comparisonValue) {
-    super(_propertyName, _comparisonValue)
+  IsScopeComparison(_lhsValue, _rhsValue) {
+    super(_lhsValue, _rhsValue)
   }
   
-  Criterion toCriterion(options) {
-    def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
-    if (comparisonValue == null) {
-      return Restrictions.isNull(property)
+  Criterion criterionForPropertyAndProperty(lhs, rhs, options) {
+    Restrictions.eqProperty(lhs, rhs)
+  }
+  
+  Criterion criterionForPropertyAndValue(property, value, options) {
+    if (value == null) {
+      Restrictions.isNull(property)
     } else {
-      return Restrictions.isNotNull(property)
+      Restrictions.isNotNull(property)
     }
   }
   
   String toString() {
-    return "(${propertyName} == ${comparisonValue})"
+    return "(${lhsValue} == ${rhsValue})"
   }
   
 }

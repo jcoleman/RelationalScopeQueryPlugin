@@ -16,25 +16,41 @@ class RelationalScopeBuilder {
   def methodMissing(String name, args) {
     assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
     
-    _processArgs_(name, args[0])
+    property(name)(args[0])
   }
   
-  def _processArgs_(property, argsMap) {
+  def _processArgs_(expression, argsMap) {
     def currentDomainClass = activeRelationalScope.grailsDomainClass
-    if (!currentDomainClass.hasPersistentProperty(property)) {
-      throw new RuntimeException("Domain class '${currentDomainClass.name}' does not contain a persistent property '${property}'. Perhaps you have a typo in your relational query?" as String)
+    if (expression instanceof LocalPropertyExpression && !(currentDomainClass.hasPersistentProperty(expression.propertyKey) || expression.propertyKey in ['id', 'version'])) {
+      throw new RuntimeException("Domain class '${currentDomainClass.name}' does not contain a persistent property '${expression.propertyKey}'. Perhaps you have a typo in your relational query?" as String)
     }
     
     argsMap.each {
       if (it.key == 'where') {
-        _projectAssociation_(property, it.value)
+        if (expression instanceof AbstractPropertyExpression) {
+          _projectAssociation_( expression.propertyKey, _valueFor_(it.value) )
+        } else {
+          throw new RuntimeException("Only property expressions can use the 'where' comparator.")
+        }
       } else {
         try {
-          _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory."${it.key}"(property, it.value) )
+          _addScopeOrComparisonToCurrentScope_(
+            ScopeComparisonFactory."${it.key}"( expression, _valueFor_(it.value) )
+          )
         } catch (MissingMethodException ex) {
           throw new RuntimeException("'${it.key}' is not a valid comparator. Perhaps you have a typo in your relational query?" as String)
         }
       }
+    }
+  }
+  
+  def _valueFor_(expression) {
+    if ( expression instanceof ExpressionBase
+         || expression instanceof RelationalScope
+         || expression instanceof Closure ) {
+      expression
+    } else {
+      value(expression)
     }
   }
   
@@ -60,6 +76,10 @@ class RelationalScopeBuilder {
   
   def property(key) {
     new LocalPropertyExpression(key, this)
+  }
+  
+  def value(val) {
+    new ValueExpression(val, this)
   }
   
   

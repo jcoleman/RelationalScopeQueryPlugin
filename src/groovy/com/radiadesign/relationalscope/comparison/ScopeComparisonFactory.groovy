@@ -4,32 +4,32 @@ class ScopeComparisonFactory {
   
   private ScopeComparisonFactory() { }
   
-  static equals(property, value) {
-    new EqualsScopeComparison(property, value)
+  static equals(lhs, rhs) {
+    new EqualsScopeComparison(lhs, rhs)
   }
   
-  static is(property, value) {
-    new IsScopeComparison(property, value)
+  static is(lhs, rhs) {
+    new IsScopeComparison(lhs, rhs)
   }
   
-  static lt(property, value) {
-    new LessThanScopeComparison(property, value)
+  static lt(lhs, rhs) {
+    new LessThanScopeComparison(lhs, rhs)
   }
   
-  static lte(property, value) {
-    new LessThanOrEqualScopeComparison(property, value)
+  static lte(lhs, rhs) {
+    new LessThanOrEqualScopeComparison(lhs, rhs)
   }
   
-  static gt(property, value) {
-    new GreaterThanScopeComparison(property, value)
+  static gt(lhs, rhs) {
+    new GreaterThanScopeComparison(lhs, rhs)
   }
   
-  static gte(property, value) {
-    new GreaterThanOrEqualScopeComparison(property, value)
+  static gte(lhs, rhs) {
+    new GreaterThanOrEqualScopeComparison(lhs, rhs)
   }
   
-  static 'in'(property, value) {
-    new InScopeComparison(property, value)
+  static 'in'(lhs, rhs) {
+    new InScopeComparison(lhs, rhs)
   }
   
   static mapTo(property, value) {

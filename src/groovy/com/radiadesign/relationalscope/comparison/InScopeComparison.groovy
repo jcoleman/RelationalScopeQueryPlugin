@@ -6,24 +6,24 @@ import com.radiadesign.relationalscope.expression.*
 
 class InScopeComparison extends ScopeComparisonBase {
   
-  InScopeComparison(String _propertyName, _comparisonValue) {
-    super(_propertyName, _comparisonValue)
+  InScopeComparison(_lhsValue, _rhsValue) {
+    super(_lhsValue, _rhsValue)
   }
   
-  Criterion toCriterion(options) {
-    def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
-    if (comparisonValue instanceof RelationalScope) {
-      def criteria = detachedCriteriaFor(comparisonValue, options) { criteria ->
-        criteria.setProjection(Projections.id())
-      }
-      return Subqueries.propertyIn(property, criteria)
-    } else {
-      return Restrictions.in(property, comparisonValue)
-    }
+  def detachedCriteriaCallback(criteria) {
+    criteria.setProjection(Projections.id())
+  }
+  
+  Criterion criterionForPropertyAndValue(property, value, options) {
+    Restrictions.in(property, value)
+  }
+  
+  Criterion criterionForPropertyAndSubquery(property, criteria, options) {
+    Subqueries.propertyIn(property, criteria)
   }
   
   String toString() {
-    return "(${propertyName} in ${comparisonValue})"
+    return "(${lhsValue} in ${rhsValue})"
   }
   
 }

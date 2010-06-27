@@ -5,21 +5,20 @@ import com.radiadesign.relationalscope.expression.*
 
 class LessThanScopeComparison extends ScopeComparisonBase {
   
-  LessThanScopeComparison(String _propertyName, _comparisonValue) {
-    super(_propertyName, _comparisonValue)
+  LessThanScopeComparison(_lhsValue, _rhsValue) {
+    super(_lhsValue, _rhsValue)
   }
   
-  Criterion toCriterion(options) {
-    def property = AbstractPropertyExpressionBase.aliasedPropertyNameFor(options, propertyName)
-    if (comparisonValue instanceof AbstractPropertyExpressionBase) {
-      return Restrictions.ltProperty( property, comparisonValue.propertyFor(options) )
-    } else {
-      return Restrictions.lt(property, comparisonValue)
-    }
+  Criterion criterionForPropertyAndProperty(lhs, rhs, options) {
+    Restrictions.ltProperty(lhs, rhs)
+  }
+  
+  Criterion criterionForPropertyAndValue(property, value, options) {
+    Restrictions.lt(property, value)
   }
   
   String toString() {
-    return "(${propertyName} < ${comparisonValue})"
+    return "(${lhsValue} < ${rhsValue})"
   }
   
 }

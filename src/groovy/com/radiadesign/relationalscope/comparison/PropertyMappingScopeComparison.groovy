@@ -5,18 +5,17 @@ import com.radiadesign.relationalscope.expression.*
 
 class PropertyMappingScopeComparison extends ScopeComparisonBase {
   
-  PropertyMappingScopeComparison(String _propertyName, _comparisonValue) {
-    super(_propertyName, _comparisonValue)
+  PropertyMappingScopeComparison(_mappedValue, _mappingKey) {
+    super(_mappedValue, _mappingKey)
   }
   
-  Criterion toCriterion(options) {
-    def property = AbstractPropertyExpressionBase.fullPropertyNameFor(options, propertyName)
-    options.propertyMappings[comparisonValue] = property
-    return null
+  Criterion criterionForPropertyAndValue(property, value, options) {
+    options.propertyMappings[value] = property
+    return null // Just a support comparison, no real criterion is generated here...
   }
   
   String toString() {
-    return "(${propertyName} => ${comparisonValue})"
+    return "(${lhsValue} => ${rhsValue})"
   }
   
 }
