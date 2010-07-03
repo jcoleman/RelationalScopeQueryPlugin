@@ -10,8 +10,10 @@ class InScopeComparison extends ScopeComparisonBase {
     super(_lhsValue, _rhsValue)
   }
   
-  def detachedCriteriaCallback(criteria) {
-    criteria.setProjection(Projections.id())
+  def detachedCriteriaCallback(RelationalScope scope, criteria) {
+    if (!scope.selections) {
+      //criteria.setProjection(Projections.id())
+    }
   }
   
   Criterion criterionForPropertyAndValue(property, value, options) {

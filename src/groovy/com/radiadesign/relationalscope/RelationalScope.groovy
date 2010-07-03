@@ -11,6 +11,7 @@ class RelationalScope {
   
   String associationName
   def scopes = []
+  def selections = []
   
   def result
   def resultIsSet = false
@@ -55,6 +56,21 @@ class RelationalScope {
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
     return this.where(block.relationalScope)
+  }
+  
+  def select(ArrayList _selections) {
+    def newScope = this.clone()
+    newScope.selections += _selections
+    return newScope
+  }
+  
+  def select(Closure block) {
+    def builder = new SelectionBuilder()
+    block = block.clone()
+    block.delegate = builder
+    block.resolveStrategy = Closure.DELEGATE_FIRST
+    block.call()
+    return this.select(builder.selections)
   }
   
   def all(forceRefresh=false) {
@@ -103,6 +119,12 @@ class RelationalScope {
                                         getDetachedCriteriaCount: { -> return detachedCriteriaCount },
                                         incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
     criteria.add(criterion)
+    
+    def projection = toProjection()
+    if (projection) {
+      criteria.setProjection(projection)
+    }
+    
     if (unique) {
       resultIsSet = true
       result = criteria.uniqueResult()
@@ -168,6 +190,20 @@ class RelationalScope {
     } else {
       // There is no criteria to create.
       return null
+    }
+  }
+  
+  Projection toProjection() {
+    if (selections.empty) {
+      return null
+    } else {
+      if (selections.size() == 1) {
+        return selections.first().toProjection()
+      } else {
+        return selections.inject(Projections.projectionList()) { projection, selection ->
+          projection.add(selection.toProjection())
+        }
+      }
     }
   }
   

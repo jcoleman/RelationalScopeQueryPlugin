@@ -20,7 +20,7 @@ class ScopeComparisonBase {
     def rootAlias = "sqrt_${options.getDetachedCriteriaCount()}"
     def detachedCriteria = DetachedCriteria.forClass(scope.domainKlass, rootAlias)
     
-    this.detachedCriteriaCallback(detachedCriteria)
+    this.detachedCriteriaCallback(scope, detachedCriteria)
     
     def newOptions = options + [ criteria: detachedCriteria,
                                  associationName: scope.associationName,
@@ -28,9 +28,15 @@ class ScopeComparisonBase {
                                  currentRootAlias: rootAlias ]
     detachedCriteria.add( scope.toCriterion(newOptions) )
     
+    def projection = scope.toProjection()
+    if (projection) {
+      detachedCriteria.setProjection(projection)
+    }
+    
+    return detachedCriteria
   }
   
-  def detachedCriteriaCallback(criteria) {
+  def detachedCriteriaCallback(RelationalScope scope, criteria) {
     // Override in child class if desired...
   }
   
