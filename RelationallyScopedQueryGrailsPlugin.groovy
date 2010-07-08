@@ -57,6 +57,12 @@ will be a level of introspection into the logical expression generated that Crit
       klass.metaClass.static.where = { arg ->
         klass.defaultScope().where(arg)
       }
+      
+      klass.metaClass.static.getAt = { index ->
+        klass.where {
+          id equals: index
+        }.find()
+      }
     }
 
     def doWithApplicationContext = { applicationContext ->

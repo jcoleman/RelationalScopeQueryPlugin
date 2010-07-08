@@ -26,7 +26,27 @@ Feature: Basic queries
       | Gregory |
       | Harold  |
       | Alice   |
-  
+      
+  Scenario: Conveniently query by domain identifier by accessing the domain like a list
+    Given I have the following domain class:
+      """
+      class Person {
+        String name
+        String gender
+
+        static constraints = {
+          gender(nullable: true)
+        }
+      }
+      """
+    And I have created the following "Person" instances:
+      | name    |
+      | Gregory |
+    When I execute the code "[Person[(Person.list() as ArrayList)[-1]?.id]]"
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+    
   Scenario: Query by a single property
     Given I have created the following "Person" instances:
       | name    |
