@@ -61,7 +61,7 @@ will be a level of introspection into the logical expression generated that Crit
       
       klass.metaClass.static.getAt = { index ->
         klass.where {
-          id equals: index
+          id equals: index as Long
         }.find()
       }
     }
