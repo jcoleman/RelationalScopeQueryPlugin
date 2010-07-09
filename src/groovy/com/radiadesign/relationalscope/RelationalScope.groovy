@@ -175,7 +175,7 @@ class RelationalScope {
     // Do we need to create new alias?
     createAssociationAliasIfNecessary(options, currentAssociationPath)
     
-    def newOptions = options + [associationName: currentAssociationPath]
+    def newOptions = options + [associationPath: currentAssociationPath]
     if (scopes.size() == 1) {
       // If there is only one scope contained in this object then
       // just delegate to that scope.

@@ -11,9 +11,9 @@ class LocalPropertyExpression extends AbstractPropertyExpression {
   
   def propertyFor(options) {
     def alias
-    if (options.associationName) {
+    if (options.associationPath) {
       def discriminator = RelationalScope.aliasDiscriminatorFor(options)
-      alias = options.associationAliases[discriminator][options.associationName]
+      alias = options.associationAliases[discriminator][options.associationPath]
       assert alias : "An association was used for which no alias has been created"
     }
     return "${alias ?: options.currentRootAlias}.${propertyKey}"
