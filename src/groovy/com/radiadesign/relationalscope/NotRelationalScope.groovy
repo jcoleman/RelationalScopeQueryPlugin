@@ -32,7 +32,7 @@ class NotRelationalScope extends OrRelationalScope {
   
   Criterion toCriterion(options) {
     Restrictions.not( super.toCriterion( options.criteria,
-                                         associationPath,
+                                         options.associationPath,
                                          options.associationAliases ) )
   }
   
