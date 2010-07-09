@@ -9,7 +9,8 @@ class RelationallyScopedQueryGrailsPlugin {
     def dependsOn = [hibernate:"1.2.0 > *"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp"
+            "grails-app/views/error.gsp",
+            "grails-app/controllers/InspectorController.groovy"
     ]
     def observes = ["domain"]
 
