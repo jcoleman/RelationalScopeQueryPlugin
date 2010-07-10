@@ -67,7 +67,7 @@ class ScopeComparisonBase {
                                  isDetachedCriteria: true,
                                  currentRootAlias: rootAlias ]
     
-    prepareCriteria(detachedCriteria, newOptions)
+    scope.prepareCriteria(detachedCriteria, newOptions)
     
     return detachedCriteria
   }
