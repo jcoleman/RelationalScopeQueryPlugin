@@ -16,6 +16,14 @@ class GreaterThanOrEqualScopeComparison extends ScopeComparisonBase {
   Criterion criterionForPropertyAndValue(property, value, options) {
     Restrictions.ge(property, value)
   }
+    
+  Criterion criterionForPropertyAndSubquery(property, criteria, options) {
+    Subqueries.propertyGe(property, criteria)
+  }
+  
+  Criterion criterionForValueAndSubquery(value, criteria, options) {
+    Subqueries.ge(value, criteria)
+  }
   
   String toString() {
     return "(${lhsValue} >= ${rhsValue})"

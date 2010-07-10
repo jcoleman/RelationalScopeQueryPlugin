@@ -17,6 +17,14 @@ class LessThanOrEqualScopeComparison extends ScopeComparisonBase {
     Restrictions.le(property, value)
   }
   
+  Criterion criterionForPropertyAndSubquery(property, criteria, options) {
+    Subqueries.propertyLe(property, criteria)
+  }
+  
+  Criterion criterionForValueAndSubquery(value, criteria, options) {
+    Subqueries.le(value, criteria)
+  }
+  
   String toString() {
     return "(${lhsValue} <= ${rhsValue})"
   }
