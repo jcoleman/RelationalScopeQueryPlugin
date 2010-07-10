@@ -13,6 +13,9 @@ class RelationalScope {
   def scopes = []
   def selections = []
   
+  def skipCount
+  def takeCount
+  
   def result
   def resultIsSet = false
   def results
@@ -32,10 +35,15 @@ class RelationalScope {
   //  
   //}
   
-  protected RelationalScope(DefaultGrailsDomainClass _grailsDomainClass, ArrayList _scopes) {
+  protected RelationalScope( DefaultGrailsDomainClass _grailsDomainClass,
+                             ArrayList _scopes, ArrayList _selections,
+                             _takeCount, _skipCount ) {
     // Provides a deep copy of the stored scopes to ensure thread safety
     scopes = _scopes.clone()
     grailsDomainClass = _grailsDomainClass
+    selections = _selections
+    takeCount = _takeCount
+    skipCount = _skipCount
   }
   
   
@@ -71,6 +79,18 @@ class RelationalScope {
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
     return this.select(builder.selections)
+  }
+  
+  def take(count) {
+    def newScope = clone()
+    newScope.takeCount = count
+    return newScope
+  }
+  
+  def skip(count) {
+    def newScope = clone()
+    newScope.skipCount = count
+    return newScope
   }
   
   def all(forceRefresh=false) {
@@ -111,13 +131,26 @@ class RelationalScope {
   def executeQuery(unique) {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass, "root")
-    def criterion = this.toCriterion( [ criteria: criteria,
-                                        currentRootAlias: "root",
-                                        associationPath: associationName,
-                                        associationAliases: [:],
-                                        propertyMappings: [:],
-                                        getDetachedCriteriaCount: { -> return detachedCriteriaCount },
-                                        incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
+    prepareCriteria( criteria, [ criteria: criteria,
+                                 currentRootAlias: "root",
+                                 associationPath: associationName,
+                                 associationAliases: [:],
+                                 propertyMappings: [:],
+                                 getDetachedCriteriaCount: { -> return detachedCriteriaCount },
+                                 incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
+    
+    if (unique) {
+      resultIsSet = true
+      result = criteria.uniqueResult()
+    } else {
+      resultsIsSet = true
+      results = criteria.list()
+    }
+  }
+  
+  def prepareCriteria(criteria, options) {
+    def criterion = this.toCriterion(options)
+    
     if (criterion) {
       criteria.add(criterion)
     }
@@ -127,12 +160,12 @@ class RelationalScope {
       criteria.setProjection(projection)
     }
     
-    if (unique) {
-      resultIsSet = true
-      result = criteria.uniqueResult()
-    } else {
-      resultsIsSet = true
-      results = criteria.list()
+    if (takeCount != null) {
+      criteria.maxResults = takeCount
+    }
+    
+    if (skipCount != null) {
+      criteria.firstResult = skipCount
     }
   }
   
@@ -211,7 +244,7 @@ class RelationalScope {
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
-    return this.class.newInstance(grailsDomainClass, scopes)
+    return this.class.newInstance(grailsDomainClass, scopes, selections, takeCount, skipCount)
   }
   
 }

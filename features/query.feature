@@ -49,7 +49,33 @@ Feature: Basic queries
     Then I should get the following results:
       | name    |
       | Gregory |
-    
+  
+  Scenario: Limit queries with a take() chain method
+    Given I have created the following "Person" instances:
+      | name    |
+      | Gregory |
+      | Harold  |
+    When I execute the following code:
+      """
+      Person.where { }.take(1).all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+  
+  Scenario: Scroll results of queries with a skip() chain method
+    Given I have created the following "Person" instances:
+      | name    |
+      | Gregory |
+      | Harold  |
+    When I execute the following code:
+      """
+      Person.where { }.skip(1).all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Harold |
+  
   Scenario: Query with a scope
     Given I have created the following "Person" instances:
       | name    | gender |

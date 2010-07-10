@@ -31,16 +31,8 @@ class ScopeComparisonBase {
                                  associationAliases: [:],
                                  isDetachedCriteria: true,
                                  currentRootAlias: rootAlias ]
-    def criterion = scope.toCriterion(newOptions)
     
-    if (criterion) {
-      detachedCriteria.add(criterion)
-    }
-    
-    def projection = scope.toProjection()
-    if (projection) {
-      detachedCriteria.setProjection(projection)
-    }
+    prepareCriteria(detachedCriteria, newOptions)
     
     return detachedCriteria
   }
