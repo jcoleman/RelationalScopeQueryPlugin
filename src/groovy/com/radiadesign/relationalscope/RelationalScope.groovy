@@ -113,7 +113,7 @@ class RelationalScope {
     def criteria = session.createCriteria(domainKlass, "root")
     def criterion = this.toCriterion( [ criteria: criteria,
                                         currentRootAlias: "root",
-                                        associationName: associationName,
+                                        associationPath: associationName,
                                         associationAliases: [:],
                                         propertyMappings: [:],
                                         getDetachedCriteriaCount: { -> return detachedCriteriaCount },
