@@ -18,6 +18,41 @@ class ScopeComparisonBase {
     rhsValue = _rhsValue
   }
   
+  
+  // --------------------------------------------------------------------------
+  // Standard RelationalScope criterion creation implementation
+  // --------------------------------------------------------------------------
+  
+  Criterion toCriterion(options) {
+    _dispatchToCriterion_(lhsValue, rhsValue, options)
+  }
+  
+  
+  // --------------------------------------------------------------------------
+  // Criterion creation methods to override in an extending comparison class
+  // --------------------------------------------------------------------------
+  
+  Criterion criterionForPropertyAndProperty(lhs, rhs, options) {
+    throw new RuntimeException("Property-to-Property comparator not implemented on ${this.class.simpleName}.")
+  }
+  
+  Criterion criterionForPropertyAndValue(property, value, options) {
+    throw new RuntimeException("Property-to-Value comparator not implemented on ${this.class.simpleName}.")
+  }
+  
+  Criterion criterionForPropertyAndSubquery(property, criteria, options) {
+    throw new RuntimeException("Property-to-Subquery comparator not implemented on ${this.class.simpleName}.")
+  }
+  
+  Criterion criterionForValueAndSubquery(value, criteria, options) {
+    throw new RuntimeException("Value-to-Subquery comparator not implemented on ${this.class.simpleName}.")
+  }
+  
+  
+  // --------------------------------------------------------------------------
+  // Semi-private API: supports subquery comparisons
+  // --------------------------------------------------------------------------
+  
   DetachedCriteria detachedCriteriaFor(RelationalScope scope, options) {
     options.incrementDetachedCriteriaCount()
     
@@ -40,6 +75,12 @@ class ScopeComparisonBase {
   def detachedCriteriaCallback(RelationalScope scope, criteria) {
     // Override in child class if desired...
   }
+  
+  
+  // --------------------------------------------------------------------------
+  // Private: these strongly typed methods support the standardization of the
+  //          criterion creation methods.
+  // --------------------------------------------------------------------------
   
   Criterion _dispatchToCriterion_(AbstractPropertyExpression prop1, AbstractPropertyExpression prop2, options ) {
     this.criterionForPropertyAndProperty( prop1.propertyFor(options),
@@ -75,25 +116,10 @@ class ScopeComparisonBase {
     _dispatchToCriterion_(val, scope, options)
   }
   
-  Criterion toCriterion(options) {
-    _dispatchToCriterion_(lhsValue, rhsValue, options)
-  }
   
-  Criterion criterionForPropertyAndProperty(lhs, rhs, options) {
-    throw new RuntimeException("Property-to-Property comparator not implemented on ${this.class.simpleName}.")
-  }
-  
-  Criterion criterionForPropertyAndValue(property, value, options) {
-    throw new RuntimeException("Property-to-Value comparator not implemented on ${this.class.simpleName}.")
-  }
-  
-  Criterion criterionForPropertyAndSubquery(property, criteria, options) {
-    throw new RuntimeException("Property-to-Subquery comparator not implemented on ${this.class.simpleName}.")
-  }
-  
-  Criterion criterionForValueAndSubquery(value, criteria, options) {
-    throw new RuntimeException("Value-to-Subquery comparator not implemented on ${this.class.simpleName}.")
-  }
+  // --------------------------------------------------------------------------
+  // Other
+  // --------------------------------------------------------------------------
   
   String toString() {
     return "ScopeComparisonBase[rhsValue: ${rhsValue}, lhsValue: ${lhsValue}]"
