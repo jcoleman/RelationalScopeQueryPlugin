@@ -12,7 +12,7 @@ class InScopeComparison extends ScopeComparisonBase {
   
   def detachedCriteriaCallback(RelationalScope scope, criteria) {
     if (!scope.selections) {
-      //criteria.setProjection(Projections.id())
+      criteria.setProjection(Projections.id())
     }
   }
   
