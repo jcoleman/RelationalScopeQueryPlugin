@@ -9,6 +9,10 @@ class ScopeComparisonBase {
   def lhsValue
   def rhsValue
   
+  ScopeComparisonBase() {
+    
+  }
+  
   ScopeComparisonBase(_lhsValue, _rhsValue) {
     lhsValue = _lhsValue
     rhsValue = _rhsValue

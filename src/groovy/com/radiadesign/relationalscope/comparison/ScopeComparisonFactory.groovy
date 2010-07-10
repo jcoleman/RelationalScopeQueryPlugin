@@ -1,5 +1,7 @@
 package com.radiadesign.relationalscope.comparison
 
+import com.radiadesign.relationalscope.RelationalScope
+
 class ScopeComparisonFactory {
   
   private ScopeComparisonFactory() { }
@@ -30,6 +32,10 @@ class ScopeComparisonFactory {
   
   static 'in'(lhs, rhs) {
     new InScopeComparison(lhs, rhs)
+  }
+  
+  static exists(RelationalScope scope) {
+    new ExistsScopeComparison(scope)
   }
   
   static mapTo(property, value) {

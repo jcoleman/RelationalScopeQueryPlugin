@@ -70,6 +70,10 @@ class RelationalScopeBuilder {
     _project_( new NotRelationalScope(activeRelationalScope.grailsDomainClass), args )
   }
   
+  def exists(RelationalScope scope) {
+    _addScopeOrComparisonToCurrentScope_(ScopeComparisonFactory.exists(scope))
+  }
+  
   def mapping(key) {
     new MappedPropertyExpression(key, this)
   }
