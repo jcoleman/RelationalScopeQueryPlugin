@@ -20,7 +20,7 @@ Feature: Basic queries
       | Gregory |
       | Harold  |
       | Alice   |
-    When I execute the code "Person.list()"
+    When I execute the code "Person.where { }.all()"
     Then I should get the following results:
       | name    |
       | Gregory |

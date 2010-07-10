@@ -118,7 +118,9 @@ class RelationalScope {
                                         propertyMappings: [:],
                                         getDetachedCriteriaCount: { -> return detachedCriteriaCount },
                                         incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
-    criteria.add(criterion)
+    if (criterion) {
+      criteria.add(criterion)
+    }
     
     def projection = toProjection()
     if (projection) {
