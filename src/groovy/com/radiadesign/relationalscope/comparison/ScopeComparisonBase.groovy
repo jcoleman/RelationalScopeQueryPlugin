@@ -23,7 +23,8 @@ class ScopeComparisonBase {
     this.detachedCriteriaCallback(scope, detachedCriteria)
     
     def newOptions = options + [ criteria: detachedCriteria,
-                                 associationName: scope.associationName,
+                                 associationPath: scope.associationName,
+                                 associationAliases: [:],
                                  isDetachedCriteria: true,
                                  currentRootAlias: rootAlias ]
     detachedCriteria.add( scope.toCriterion(newOptions) )
