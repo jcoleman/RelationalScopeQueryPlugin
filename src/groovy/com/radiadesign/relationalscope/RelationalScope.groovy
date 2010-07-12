@@ -15,11 +15,14 @@ class RelationalScope {
   
   def skipCount
   def takeCount
+  def orderBy = []
   
   def result
   def resultIsSet = false
   def results
   def resultsIsSet = false
+  def resultCount
+  def countIsSet = false
   
   def detachedCriteriaCount = 0
   
@@ -80,6 +83,12 @@ class RelationalScope {
     block.call()
     return this.select(builder.selections)
   }
+
+  def order(property, direction = 'asc') {
+    def newScope = clone()
+    orderBy.push([property: property, direction: direction])
+    return newScope
+  }
   
   def take(count) {
     def newScope = clone()
@@ -96,6 +105,17 @@ class RelationalScope {
   def all(forceRefresh=false) {
     if (!resultsIsSet || forceRefresh) { executeQuery(false) }
     return results
+  }
+
+  def count(forceRefresh=false) {
+    if (resultsIsSet && !forceRefresh) {
+      return results.size()
+    }
+
+    if (!countIsSet || forceRefresh) {
+      executeCount()
+    } 
+    return resultCount
   }
   
   def first(forceRefresh=false) {
@@ -127,8 +147,8 @@ class RelationalScope {
   // --------------------------------------------------------------------------
   // Private API
   // --------------------------------------------------------------------------
-  
-  def executeQuery(unique) {
+
+  def executableCriteria(unique) {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass, "root")
     prepareCriteria( criteria, [ criteria: criteria,
@@ -138,7 +158,11 @@ class RelationalScope {
                                  propertyMappings: [:],
                                  getDetachedCriteriaCount: { -> return detachedCriteriaCount },
                                  incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
-    
+    return criteria
+  }
+  
+  def executeQuery(unique) {
+    def criteria = executableCriteria(unique)
     if (unique) {
       resultIsSet = true
       result = criteria.uniqueResult()
@@ -146,6 +170,11 @@ class RelationalScope {
       resultsIsSet = true
       results = criteria.list()
     }
+  }
+
+  def executeCount() {
+    countIsSet = true
+    resultCount = executableCriteria(false).count()
   }
   
   def prepareCriteria(criteria, options) {
@@ -166,6 +195,16 @@ class RelationalScope {
     
     if (skipCount != null) {
       criteria.firstResult = skipCount
+    }
+
+    orderBy.each { orderProperty ->
+      def lowerDirection = orderProperty.direction.toLowerCase()
+      if (!(lowerDirection.startsWith('asc') || lowerDirection.startsWith('desc'))) {
+        throw RuntimeException("Order by direction '${orderProperty.direction}' is invalid. Use 'asc' or 'desc'.")
+      }
+      
+      criteria.addOrder(new Order(orderProperty.property,
+                                 lowerDirection.startsWith('asc')))
     }
   }
   

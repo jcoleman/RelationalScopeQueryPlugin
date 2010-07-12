@@ -85,8 +85,7 @@ class RelationalScopeBuilder {
   def value(val) {
     new ValueExpression(val, this)
   }
-  
-  
+
   def getActiveRelationalScope() {
     _scopeStack_ && !_scopeStack_.empty() ? _scopeStack_.peek() : _scope_
   }
