@@ -33,6 +33,10 @@ class ScopeComparisonFactory {
   static 'in'(lhs, rhs) {
     new InScopeComparison(lhs, rhs)
   }
+
+  static between(lhs, rhs) {
+    new BetweenScopeComparison(lhs, rhs)
+  }
   
   static exists(RelationalScope scope) {
     new ExistsScopeComparison(scope)
@@ -41,5 +45,5 @@ class ScopeComparisonFactory {
   static mapTo(property, value) {
     new PropertyMappingScopeComparison(property, value)
   }
-  
+
 }
