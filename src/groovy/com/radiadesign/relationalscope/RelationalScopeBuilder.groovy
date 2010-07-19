@@ -14,7 +14,7 @@ class RelationalScopeBuilder {
   }
   
   def methodMissing(String name, args) {
-    assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map"
+    assert args.size() == 1 : "Setting comparisons for a property may only be called with a single map. Your args were ${args}"
     
     property(name)(args[0])
   }

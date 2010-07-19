@@ -40,13 +40,14 @@ class RelationalScope {
   
   protected RelationalScope( DefaultGrailsDomainClass _grailsDomainClass,
                              ArrayList _scopes, ArrayList _selections,
-                             _takeCount, _skipCount ) {
+                             _takeCount, _skipCount, _orderBy) {
     // Provides a deep copy of the stored scopes to ensure thread safety
     scopes = _scopes.clone()
     grailsDomainClass = _grailsDomainClass
     selections = _selections
     takeCount = _takeCount
     skipCount = _skipCount
+    orderBy = _orderBy
   }
   
   
@@ -86,7 +87,7 @@ class RelationalScope {
 
   def order(property, direction = 'asc') {
     def newScope = clone()
-    orderBy.push([property: property, direction: direction])
+    newScope.orderBy.push([property: property, direction: direction])
     return newScope
   }
   
@@ -174,7 +175,7 @@ class RelationalScope {
 
   def executeCount() {
     countIsSet = true
-    resultCount = executableCriteria(false).count()
+    resultCount = executableCriteria(false).setProjection(Projections.rowCount()).list().first()
   }
   
   def prepareCriteria(criteria, options) {
@@ -287,7 +288,7 @@ class RelationalScope {
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
-    return this.class.newInstance(grailsDomainClass, scopes, selections, takeCount, skipCount)
+    return this.class.newInstance(grailsDomainClass, scopes, selections, takeCount, skipCount, orderBy)
   }
   
 }
