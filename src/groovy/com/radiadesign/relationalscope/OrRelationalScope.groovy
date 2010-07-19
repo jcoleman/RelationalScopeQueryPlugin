@@ -33,5 +33,9 @@ class OrRelationalScope extends RelationalScope {
   def junction() {
     Restrictions.disjunction()
   }
-  
+
+  String toString() {
+    "(${scopes.collect {it.toString()}.join(' || ')})"
+  } 
+
 }

@@ -33,5 +33,8 @@ class NotRelationalScope extends OrRelationalScope {
   Criterion toCriterion(options) {
     Restrictions.not( super.toCriterion(options) )
   }
-  
+
+  String toString() {
+    "!(${scopes.collect {it.toString()}.join(' || ')})"
+  } 
 }

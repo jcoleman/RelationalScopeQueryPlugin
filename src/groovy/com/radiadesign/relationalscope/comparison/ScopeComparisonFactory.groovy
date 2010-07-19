@@ -9,6 +9,10 @@ class ScopeComparisonFactory {
   static equals(lhs, rhs) {
     new EqualsScopeComparison(lhs, rhs)
   }
+
+  static eq(lhs, rhs) {
+    equals(lhs, rhs)
+  }
   
   static is(lhs, rhs) {
     new IsScopeComparison(lhs, rhs)
@@ -37,7 +41,11 @@ class ScopeComparisonFactory {
   static between(lhs, rhs) {
     new BetweenScopeComparison(lhs, rhs)
   }
-  
+
+  static betwixt(lhs, rhs) {
+    between(lhs, rhs)
+  }
+
   static exists(RelationalScope scope) {
     new ExistsScopeComparison(scope)
   }

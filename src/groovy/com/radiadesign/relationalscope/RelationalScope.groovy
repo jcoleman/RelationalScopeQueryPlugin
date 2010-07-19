@@ -280,6 +280,10 @@ class RelationalScope {
       }
     }
   }
+
+  String toString() {
+    "(${scopes.collect {it.toString()}.join(' && ')})"
+  }
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
