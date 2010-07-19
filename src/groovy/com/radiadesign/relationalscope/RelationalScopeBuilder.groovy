@@ -100,6 +100,7 @@ class RelationalScopeBuilder {
     
     args.each { arg ->
       if (arg instanceof Closure) {
+        arg.delegate = this
         arg.call()
       } else if (arg instanceof RelationalScope) {
         _addScopeOrComparisonToCurrentScope_(arg)
