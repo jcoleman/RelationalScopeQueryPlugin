@@ -14,6 +14,10 @@ class ScopeComparisonFactory {
     equals(lhs, rhs)
   }
   
+  static ne(lhs, rhs) {
+    new NotEqualsScopeComparison(lhs, rhs)
+  }
+
   static is(lhs, rhs) {
     new IsScopeComparison(lhs, rhs)
   }
@@ -36,6 +40,14 @@ class ScopeComparisonFactory {
   
   static 'in'(lhs, rhs) {
     new InScopeComparison(lhs, rhs)
+  }
+
+  static like(lhs, rhs) {
+    new LikeScopeComparison(lhs, rhs)
+  }
+
+  static ilike(lhs, rhs) {
+    new ILikeScopeComparison(lhs, rhs)
   }
 
   static between(lhs, rhs) {
