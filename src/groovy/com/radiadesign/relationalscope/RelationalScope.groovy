@@ -175,7 +175,7 @@ class RelationalScope {
 
   def executeCount() {
     countIsSet = true
-    resultCount = executableCriteria(false).setProjection(Projections.rowCount()).list().first()
+    resultCount = executableCriteria(false).setProjection(Projections.countDistinct("id")).list().first()
   }
   
   def prepareCriteria(criteria, options) {
