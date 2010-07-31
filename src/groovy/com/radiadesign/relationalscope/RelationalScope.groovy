@@ -86,8 +86,13 @@ class RelationalScope {
   }
 
   def order(property, direction = 'asc') {
+    direction = direction.toLowerCase()
+    if (!(direction.startsWith('asc') || direction.startsWith('desc'))) {
+      throw RuntimeException("Order by direction '${direction}' is invalid. Use 'asc' or 'desc'.")
+    }
+    
     def newScope = clone()
-    newScope.orderBy.push([property: property, direction: direction])
+    newScope.orderBy << [property: property, direction: lowerDirection]
     return newScope
   }
   
@@ -199,13 +204,8 @@ class RelationalScope {
     }
 
     orderBy.each { orderProperty ->
-      def lowerDirection = orderProperty.direction.toLowerCase()
-      if (!(lowerDirection.startsWith('asc') || lowerDirection.startsWith('desc'))) {
-        throw RuntimeException("Order by direction '${orderProperty.direction}' is invalid. Use 'asc' or 'desc'.")
-      }
-      
-      criteria.addOrder(new Order(orderProperty.property,
-                                 lowerDirection.startsWith('asc')))
+      criteria.addOrder( new Order(orderProperty.property,
+                                   orderProperty.direction == 'asc') )
     }
   }
   
