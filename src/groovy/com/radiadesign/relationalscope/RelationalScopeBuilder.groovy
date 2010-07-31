@@ -120,20 +120,25 @@ class RelationalScopeBuilder {
     def currentDomainClass = activeRelationalScope.grailsDomainClass
     def domainProperty = currentDomainClass.getPropertyByName(associationName)
     if (!domainProperty.isAssociation()) {
-      throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${property}' is not an association and cannot be used with the 'where' comparator in a relational query?" as String)
+      throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${associationName}' is not an association and cannot be used with the 'where' comparator in a relational query?" as String)
     }
     
-    def relation = new RelationalScope(domainProperty.getReferencedDomainClass())
+    def referencedDomainClass = domainProperty.referencedDomainClass
+    def relation = new RelationalScope(referencedDomainClass)
     
     if (domainProperty.isOneToMany()) {
-      // We don't want to do a join here, because then the restrictions based on the association's values
-      // will actually restrict the values that appear in the association collection. Instead, a reasonable
-      // assumption is that the user intends to think of this as "where any of the association have the
-      // following criteria"
-      def scope = _projectionToScope_(relation, args).select {
-        "${domainProperty.referencedPropertyName}"()
+      if (domainProperty.referencedPropertyName == null) {
+        throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${associationName}' is type hasMany, yet the referenced domain class '${referencedDomainClass.name}' does not have a corresponding relationship." as String)
+      } else {
+        // We don't want to do a join here, because then the restrictions based on the association's values
+        // will actually restrict the values that appear in the association collection. Instead, a reasonable
+        // assumption is that the user intends to think of this as "where any of the association have the
+        // following criteria"
+        def scope = _projectionToScope_(relation, args).select {
+          "${domainProperty.referencedPropertyName}"()
+        }
+        _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory.in(property(associationName), scope) )
       }
-      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory.in(property(associationName), scope) )
     } else {
       relation.associationName = associationName
       _project_(relation , args)
