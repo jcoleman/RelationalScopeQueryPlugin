@@ -94,7 +94,7 @@ class RelationalScopeBuilder {
     activeRelationalScope.addScopeOrComparison(newScope)
   }
   
-  def _project_(newScope, Object[] args) {
+  def _projectionToScope_(newScope, Object[] args) {
     if (!_scopeStack_) { _scopeStack_ = new Stack() }
     _scopeStack_.push(newScope)
     
@@ -109,7 +109,11 @@ class RelationalScopeBuilder {
       }
     }
     
-    _addScopeOrComparisonToCurrentScope_( _scopeStack_.pop() )
+    return _scopeStack_.pop()
+  }
+  
+  def _project_(newScope, Object[] args) {
+    _addScopeOrComparisonToCurrentScope_( _projectionToScope_(newScope, args) )
   }
   
   def _projectAssociation_(associationName, Object[] args) {
@@ -120,8 +124,20 @@ class RelationalScopeBuilder {
     }
     
     def relation = new RelationalScope(domainProperty.getReferencedDomainClass())
-    relation.associationName = associationName
-    _project_(relation , args)
+    
+    if (domainProperty.isOneToMany()) {
+      // We don't want to do a join here, because then the restrictions based on the association's values
+      // will actually restrict the values that appear in the association collection. Instead, a reasonable
+      // assumption is that the user intends to think of this as "where any of the association have the
+      // following criteria"
+      def scope = _projectionToScope_(relation, args).select {
+        "${domainProperty.referencedPropertyName}"()
+      }
+      _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory.in(property(associationName), scope) )
+    } else {
+      relation.associationName = associationName
+      _project_(relation , args)
+    }
   }
   
   // Helper property for 'is' comparison
