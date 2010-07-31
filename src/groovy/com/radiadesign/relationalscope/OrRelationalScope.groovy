@@ -17,8 +17,8 @@ class OrRelationalScope extends RelationalScope {
   //  super(json)
   //}
   
-  protected OrRelationalScope(DefaultGrailsDomainClass _grailsDomainClass, ArrayList _scopes) {
-    super(_grailsDomainClass, _scopes)
+  protected OrRelationalScope(OrRelationalScope scope) {
+    super(scope)
   }
   
   

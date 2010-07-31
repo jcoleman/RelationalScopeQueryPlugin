@@ -38,16 +38,14 @@ class RelationalScope {
   //  
   //}
   
-  protected RelationalScope( DefaultGrailsDomainClass _grailsDomainClass,
-                             ArrayList _scopes, ArrayList _selections,
-                             _takeCount, _skipCount, _orderBy) {
+  protected RelationalScope(RelationalScope scope) {
     // Provides a deep copy of the stored scopes to ensure thread safety
-    scopes = _scopes.clone()
-    grailsDomainClass = _grailsDomainClass
-    selections = _selections
-    takeCount = _takeCount
-    skipCount = _skipCount
-    orderBy = _orderBy
+    scopes = scope.scopes.clone()
+    grailsDomainClass = scope.grailsDomainClass
+    selections = scope.selections.clone()
+    takeCount = scope.takeCount
+    skipCount = scope.skipCount
+    orderBy = scope.orderBy.clone()
   }
   
   
@@ -288,7 +286,7 @@ class RelationalScope {
   
   // Provides a thread-safe copy of the current RelationalScope
   RelationalScope clone() {
-    return this.class.newInstance(grailsDomainClass, scopes, selections, takeCount, skipCount, orderBy)
+    return this.class.newInstance(this)
   }
   
 }
