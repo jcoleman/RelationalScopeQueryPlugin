@@ -7,7 +7,7 @@ class SelectionBuilder {
   def selections = []
   
   def methodMissing(String name, args) {
-    assert args.empty : "Currently property selections do not support any arguments"
+    assert args.size() == 0 : "Currently property selections do not support any arguments; got ${args}"
     
     property(name)
   }
