@@ -30,12 +30,20 @@ class ScopeComparisonFactory {
     new LessThanOrEqualScopeComparison(lhs, rhs)
   }
   
+  static le(lhs, rhs) {
+    lte(lhs, rhs)
+  }
+  
   static gt(lhs, rhs) {
     new GreaterThanScopeComparison(lhs, rhs)
   }
   
   static gte(lhs, rhs) {
     new GreaterThanOrEqualScopeComparison(lhs, rhs)
+  }
+  
+  static ge(lhs, rhs) {
+    gte(lhs, rhs)
   }
   
   static 'in'(lhs, rhs) {
