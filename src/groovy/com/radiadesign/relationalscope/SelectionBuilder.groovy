@@ -4,7 +4,7 @@ import com.radiadesign.relationalscope.selection.*
 
 class SelectionBuilder {
   
-  def selections = []
+  def _selections_ = []
   
   def methodMissing(String name, args) {
     assert args.size() == 0 : "Currently property selections do not support any arguments; got ${args}"
@@ -13,43 +13,52 @@ class SelectionBuilder {
   }
   
   def property(String propertyName) {
-    selections << new PropertySelection(propertyName)
+    _addSelection_( new PropertySelection(propertyName) )
   }
   
   def id() {
-    selections << new IdentifierSelection()
+    _addSelection_( new IdentifierSelection() )
   }
   
   def max(String propertyName) {
-    selections << new MaximumSelection(propertyName)
+    _addSelection_( new MaximumSelection(propertyName) )
   }
   
   def min(String propertyName) {
-    selections << new MinimumSelection(propertyName)
+    _addSelection_( new MinimumSelection(propertyName) )
   }
   
   def sum(String propertyName) {
-    selections << new SummationSelection(propertyName)
+    _addSelection_( new SummationSelection(propertyName) )
   }
   
   def average(String propertyName) {
-    selections << new AverageSelection(propertyName)
+    _addSelection_( new AverageSelection(propertyName) )
   }
   
   def count(String propertyName) {
-    selections << new CountSelection(propertyName)
+    _addSelection_( new CountSelection(propertyName) )
   }
   
   def count(DistinctSelection property) {
-    selections << new CountSelection(property)
+    _addSelection_( new CountSelection(property) )
   }
   
   def distinct(String propertyName) {
-    selections << new DistinctSelection(property(propertyName))
+    _addSelection_( new DistinctSelection(property(propertyName)) )
   }
   
   def distinct(AbstractSelection property) {
-    selections << new DistinctSelection(property)
+    _addSelection_( new DistinctSelection(property) )
+  }
+  
+  def _addSelection_(AbstractSelection selection) {
+    if ( _selections_.size() > 0 && _selections_[-1].is(selection.) ) {
+      // If the "new" selection is just wrapping a previous one, don't select both separately
+      _selections[-1] = selection
+    } else {
+      _selections_ << selection
+    }
   }
   
 }
