@@ -90,7 +90,7 @@ class RelationalScope {
     }
     
     def newScope = clone()
-    newScope.orderBy << [property: property, direction: lowerDirection]
+    newScope.orderBy << [property: property, direction: direction]
     return newScope
   }
   
