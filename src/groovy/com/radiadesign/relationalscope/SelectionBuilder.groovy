@@ -53,7 +53,7 @@ class SelectionBuilder {
   }
   
   def _addSelection_(AbstractSelection selection) {
-    if ( _selections_.size() > 0 && _selections_[-1].is(selection.) ) {
+    if ( _selections_.size() > 0 && _selections_[-1].is(selection.property) ) {
       // If the "new" selection is just wrapping a previous one, don't select both separately
       _selections[-1] = selection
     } else {
