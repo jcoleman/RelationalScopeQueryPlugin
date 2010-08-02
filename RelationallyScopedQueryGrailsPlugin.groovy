@@ -1,6 +1,6 @@
 import com.radiadesign.relationalscope.RelationalScope
 
-class RelationalScopeGrailsPlugin {
+class RelationallyScopedQueryGrailsPlugin {
     // the plugin version
     def version = "1.0-RC2"
     // the version or versions of Grails the plugin is designed for
