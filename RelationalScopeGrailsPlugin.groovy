@@ -1,8 +1,8 @@
 import com.radiadesign.relationalscope.RelationalScope
 
-class RelationallyScopedQueryGrailsPlugin {
+class RelationalScopeGrailsPlugin {
     // the plugin version
-    def version = "1.0-RC1"
+    def version = "1.0-RC2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.0 > *"
     // the other plugins this plugin depends on
@@ -17,7 +17,7 @@ class RelationallyScopedQueryGrailsPlugin {
     // TODO Fill in these fields
     def author = "James Coleman"
     def authorEmail = "jtc331+scopedquery@gmail.com"
-    def title = "Relationally Scoped Querying"
+    def title = "RelationalScope"
     def description = '''\\
 This plugin was inspired by both the power of Groovy builders in HibernateCriteriaBuilder 
 and the new Relation querying API that appeared in ActiveRecord with Rails 3.0. Major goals 
