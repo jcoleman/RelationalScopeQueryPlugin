@@ -80,7 +80,7 @@ class RelationalScope {
     block.delegate = builder
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
-    return this.select(builder.selections)
+    return this.select(builder._selections_)
   }
 
   def order(property, direction = 'asc') {
