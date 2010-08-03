@@ -8,10 +8,14 @@ Feature: Basic queries
       """
       class Person {
         String name
+        String email
+        String email2
         String gender
         
         static constraints = {
           gender(nullable: true)
+          email(nullable: true)
+          email2(nullable: true)
         }
       }
       """
@@ -111,3 +115,48 @@ Feature: Basic queries
       | name    |
       | Harold  |
       | Alice   |
+  
+  Scenario: Query with "property ne: value" clause (should hide SQL ternary logic)
+    Given I have created the following "Person" instances:
+      | name    | gender |
+      | Gregory | male   |
+      | Sally   | female |
+    Given I have created the following "Person" instances:
+      | name    |
+      | Harold  |
+    When I execute the following code:
+      """
+      Person.where {
+        gender ne: "female"
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+      | Harold  |
+  
+  Scenario: Query with "property ne: property" clause (should hide SQL ternary logic)
+    Given I have created the following "Person" instances:
+      | name    | email         |
+      | Gregory | greg@me.com   |
+      | Sally   | sally@me.com  |
+    Given I have created the following "Person" instances:
+      | name    |
+      | Bob     |
+    Given I have created the following "Person" instances:
+      | name    | email       | email2      |
+      | Tim     | tim@me.com  | tim@me.com  |
+    Given I have created the following "Person" instances:
+      | name    | email2         |
+      | Harold  | harold@me.com  |
+    When I execute the following code:
+      """
+      Person.where {
+        email ne: property("email2")
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+      | Sally   |
+      | Harold  |
