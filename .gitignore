@@ -1,2 +1,4 @@
 web-app/WEB-INF
 target
+plugin.xml
+*.zip
