@@ -16,6 +16,10 @@ class GreaterThanOrEqualScopeComparison extends ScopeComparisonBase {
   Criterion criterionForPropertyAndValue(property, value, options) {
     Restrictions.ge(property, value)
   }
+  
+  Criterion criterionForValueAndProperty(value, property, options) {
+    Restrictions.le(property, value)
+  }
     
   Criterion criterionForPropertyAndSubquery(property, criteria, options) {
     Subqueries.propertyGe(property, criteria)

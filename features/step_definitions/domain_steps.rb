@@ -90,8 +90,28 @@ Then /^I should get the following results(, in order)?:$/ do |order, instances|
   
   # Remove columns we don't care about from the results hashes
   thinned_result = @result.collect do |instance|
-    instance.reject { |key, value| !columns.include? key }
+    stringified_instance = Hash.new
+    instance.reject { |key, value| !columns.include? key }.each do |key, value|
+      stringified_instance[key] = value ? value.to_s : value
+    end
+    stringified_instance
   end
   
-  Set.new(thinned_result) == Set.new(instances.hashes)
+  #puts "results"
+  #thinned_result.each do |i|
+  #  i.each do |k,v|
+  #    puts k ? k.bytes.to_a.inspect : k
+  #    puts v ? v.bytes.to_a.inspect : v
+  #  end
+  #end
+  #
+  #puts "instances"
+  #instances.hashes.each do |i|
+  #  i.each do |k,v|
+  #    puts k ? k.bytes.to_a.inspect : k
+  #    puts v ? v.bytes.to_a.inspect : v
+  #  end
+  #end
+  
+  Set.new(thinned_result).to_a.should include(*Set.new(instances.hashes).to_a)
 end

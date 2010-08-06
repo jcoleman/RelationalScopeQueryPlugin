@@ -40,12 +40,24 @@ class ScopeComparisonBase {
     throw new RuntimeException("Property-to-Value comparator not implemented on ${this.class.simpleName}.")
   }
   
+  Criterion criterionForValueAndProperty(value, property, options) {
+    throw new RuntimeException("Value-to-Property comparator not implemented on ${this.class.simpleName}.")
+  }
+  
   Criterion criterionForPropertyAndSubquery(property, criteria, options) {
     throw new RuntimeException("Property-to-Subquery comparator not implemented on ${this.class.simpleName}.")
   }
   
+  Criterion criterionForSubqueryAndProperty(criteria, property, options) {
+    throw new RuntimeException("Subquery-to-property comparator not implemented on ${this.class.simpleName}.")
+  }
+  
   Criterion criterionForValueAndSubquery(value, criteria, options) {
     throw new RuntimeException("Value-to-Subquery comparator not implemented on ${this.class.simpleName}.")
+  }
+  
+  Criterion criterionForSubqueryAndValue(criteria, value, options) {
+    throw new RuntimeException("Subquery-to-Value comparator not implemented on ${this.class.simpleName}.")
   }
   
   
@@ -93,7 +105,7 @@ class ScopeComparisonBase {
   }
   
   Criterion _dispatchToCriterion_(ValueExpression val, AbstractPropertyExpression prop, options) {
-    _dispatchToCriterion_(prop, val, options)
+    this.criterionForValueAndProperty(val.value, prop.propertyFor(options), options)
   }
   
   Criterion _dispatchToCriterion_(AbstractPropertyExpression prop, RelationalScope scope, options) {
@@ -103,7 +115,9 @@ class ScopeComparisonBase {
   }
   
   Criterion _dispatchToCriterion_(RelationalScope scope, AbstractPropertyExpression prop, options) {
-    _dispatchToCriterion_(prop, scope, options)
+    this.criterionForSubqueryAndProperty( this.detachedCriteriaFor(scope, options),
+                                          prop.propertyFor(options),
+                                          options )
   }
   
   Criterion _dispatchToCriterion_(ValueExpression val, RelationalScope scope, options) {
@@ -113,7 +127,9 @@ class ScopeComparisonBase {
   }
   
   Criterion _dispatchToCriterion_(RelationalScope scope, ValueExpression val, options) {
-    _dispatchToCriterion_(val, scope, options)
+    this.criterionForValueAndSubquery( this.detachedCriteriaFor(scope, options),
+                                       val.value,
+                                       options )
   }
   
   
