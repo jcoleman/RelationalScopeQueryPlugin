@@ -30,6 +30,10 @@ class NotEqualsScopeComparison extends ScopeComparisonBase {
     
   }
   
+  Criterion criterionForValueAndProperty(value, property, options) {
+    criterionForPropertyAndValue(property, value, options)
+  }
+  
   Criterion criterionForPropertyAndSubquery(property, criteria, options) {
     Subqueries.propertyNe(property, criteria)
   }

@@ -17,6 +17,10 @@ class EqualsScopeComparison extends ScopeComparisonBase {
     Restrictions.eq(property, value)
   }
   
+  Criterion criterionForValueAndProperty(value, property, options) {
+    criterionForPropertyAndValue(property, value, options)
+  }
+  
   Criterion criterionForPropertyAndSubquery(property, criteria, options) {
     Subqueries.propertyEq(property, criteria)
   }

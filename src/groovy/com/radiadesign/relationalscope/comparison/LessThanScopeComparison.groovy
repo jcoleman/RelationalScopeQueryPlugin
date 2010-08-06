@@ -17,6 +17,10 @@ class LessThanScopeComparison extends ScopeComparisonBase {
     Restrictions.lt(property, value)
   }
   
+  Criterion criterionForValueAndProperty(value, property, options) {
+    Restrictions.gt(property, value)
+  }
+  
   Criterion criterionForPropertyAndSubquery(property, criteria, options) {
     Subqueries.propertyLt(property, criteria)
   }
