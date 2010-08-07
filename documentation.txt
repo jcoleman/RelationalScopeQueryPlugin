@@ -1,4 +1,14 @@
-See the Github page at:
+h3. Why RelationalScope?
+
+As a developer in a fast-paced environment, I want my database to transparently support my work. In order to develop software reliably and quickly, I shouldn't have to think in SQL when writing code to interact with the database. But even more, I shouldn't even have to think as if I'm using a database.
+
+With RelationalScope you can make that goal come true. RelationalScope takes the work out of writing code to query the database and sits on top of Hibernate Criteria in the GORM environment to be able to support your Grails development work.
+
+How is RelationalScope so beneficial? Two main features (among many others) stand out:
+* Transparency. RelationalScope masks the complexity under the hood by allowing you to compare different expressions with the same syntax whether your query's restrictions would be expressed by columns, values, or subqueries.
+* Multi-tenancy. RelationalScope allows your development team to invisible support client separation through the concept of default scopes. You can define default base scopes on each domain class that involves client specific data that will cause all queries against that domain to restrict results to the currently logged in user. Once setup, your development team no longer has to worry about writing client or user separation code - it just happens. If a user tries to access a resource to which he does not belong (according to the default scope for that resource) the resulting query would not return the result. Rather than handling the permissions issue in each controller, it would just appear that the resource doesn't exist - making it seem like each client really has their own system.
+
+RelationalScope is hosted at GitHub. There you can see the latest development work, submit bugs and feature requests, and contribute code.
 
 [http://github.com/jcoleman/RelationalScopeQueryPlugin]
 
