@@ -28,7 +28,7 @@ Feature: Sub-queries
       | Customer  |
     When I execute the code "Customer.where { exists( Account.where { } )}.all()"
     Then I should get the following results:
-    | name    |
-    | Bob     |
-    | Elsie   |
+      | name    |
+      | Bob     |
+      | Elsie   |
     
