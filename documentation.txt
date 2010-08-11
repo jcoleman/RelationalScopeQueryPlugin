@@ -1,0 +1,210 @@
+h3. Why RelationalScope?
+
+As a developer in a fast-paced environment, I want my database to transparently support my work. In order to develop software reliably and quickly, I shouldn't have to think in SQL when writing code to interact with the database. But even more, I shouldn't even have to think as if I'm using a database.
+
+With RelationalScope you can make that goal come true. RelationalScope takes the work out of writing code to query the database and sits on top of Hibernate Criteria in the GORM environment to be able to support your Grails development work.
+
+How is RelationalScope so beneficial? Two main features (among many others) stand out:
+* Transparency. RelationalScope masks the complexity under the hood by allowing you to compare different expressions with the same syntax whether your query's restrictions would be expressed by columns, values, or subqueries.
+* Multi-tenancy. RelationalScope allows your development team to invisible support client separation through the concept of default scopes. You can define default base scopes on each domain class that involves client specific data that will cause all queries against that domain to restrict results to the currently logged in user. Once setup, your development team no longer has to worry about writing client or user separation code - it just happens. If a user tries to access a resource to which he does not belong (according to the default scope for that resource) the resulting query would not return the result. Rather than handling the permissions issue in each controller, it would just appear that the resource doesn't exist - making it seem like each client really has their own system.
+
+RelationalScope is hosted at GitHub. There you can see the latest development work, submit bugs and feature requests, and contribute code.
+
+[http://github.com/jcoleman/RelationalScopeQueryPlugin]
+
+h3. RelationalScope Documentation
+
+RelationalScope provides a series of chainable methods as its external interface. This documentation is broken down into sub-sections based on those methods.
+
+h4. Querying:
+
+The RelationalScope plugin injects the "where" method onto all domain classes. This method provides the basis for creating scopes. It accepts either a closure or another scope as its single argument and returns a new instance of RelationalScope matched to the domain on which it was called and encapsulates the restrictions represented by its argument.
+
+Note this does mean that the query is not actually executed on creation of a scope object. Rather, the scope object is designed to used lazily (re-used - such as returned from a static emthod on a domain class). See the "Query Execution" section for details on how to retrieve results.
+
+Calling the where() method with a preexisting RelationalScope instance allows one to easily reuse standard scopes. This is a thread-safe operation: every time a method is chained onto a RelationalScope instance, a copy of the delegate scope is created onto which will be added the new restrictions. In order to create restrictions on a scope, the builder form is used. Inside the builder closure any number of restrictions may be expressed in the following form: "expression1 operator: expression2". Since the form actually represents a method call of the method "expression1" with a single argument (a map of operators to expressions) one may represent multiple restrictions in a single call. If multiple keys are present in the map argument they will be treated as a logical "AND" expression group.
+
+RelationalScope is built on the premise that intelligence combined with sane defaults can create a convention which allows scopes to be created intuitively. In practice, this means that while Hibernate Criteria exposes an interface that is different for property-to-property, property-to-value, property-to-subquery, and value-to-subquery restrictions, RelationalScope attempts to hide this unnecessary complexity leading to more enjoyable programming. So, for example, the expression on the left hand side is considered to be the name of a domain class property by default. Also, by the default the value on the right hand side is treated as a value expression. If, however, the expression on the right hand side is an instance of RelationalScope, then that expression will be converted into a subquery. Expressions on either side may be wrapped in calls to the property() or value() methods if anything other than the default behavior is desired. In other words, the following:
+
+{code}
+Person.where {
+  email equals: "bob@me.com"
+}
+{code}
+
+would create a scope that restricts a query on the Person domain class to records where "personInstance.email == 'bob@me.com'". However, the following:
+
+{code}
+Person.where {
+  email equals: property("secondaryEmail")
+}
+{code}
+
+would create a scope that restricts a query on the Person domain class to records where "personInstance.email == personInstance.secondaryEmail". Similarly the first example could also be represented by either of the following scopes:
+
+{code}
+Person.where {
+  value("bob@me.com") equals: property("email")
+}
+
+
+Person.where {
+  property("email") equals: value("bob@me.com")
+}
+{code}
+
+Beyond property and value expressions, RelationalScope instances are also treated as an expression type. For example, it would make sense for the "in" operator to allow both of the following: 
+
+{code}
+Person.where {
+  id in: [1,2,3,4,5]
+}
+
+Person.where {
+  id in: Person.where { email ne: "bob@me.com" }
+}
+{code}
+
+the first would result in a SQL query with the keyword "in" followed by a static list while the second would generate a SQL query with the keyword "in" followed by a nested query. Incidentally, other operators such as "equals" also work with a scope expression (though may require a single value to be returned by the subquery - which can be done with the select() method which will be demonstrated later).
+
+
+h4. Available Operators within the where() builder context:
+
+* Equality: "equals" or "eq"
+* Greater-than: "gt"
+* Greater-than or equal: "gte" or "ge"
+* Less-than: "lt"
+* Less-than or equal: "lte" or "le"
+* Null comparator: "is" (valid compared expressions are [null, notNull] - "notNull" is a helper variable existing in the scope builder context)
+* Between: "between" (accepts a list of two values as the comparative expression)
+* In: "in"
+* Like: "like" and its case insensitive version "ilike"
+* Exists: a special case comparator is used to generate the SQL exists (subquery):
+* Non-equality: "ne" - note that this restriction does not just create an SQL "<>" operator. Rather, it also works around the weirdness of SQL's tri-state logic. For example, if you do "property ne: 5" then any result where property is null or does not equal 5 will be returned (where typically SQL wouldn't return the null values).
+
+{code}
+Person.where {
+  exists(relationalScopeInstance)
+}
+{code}
+
+In order to support correlated subqueries, the quasi-comparator "mapTo" can be used to assign an identifier to a domain property for reference later via the mapping() helper method (this also would be used when querying across associations). For example:
+
+{code}
+Person.where {
+  id mapTo: "parent_id", in: Person.where {
+    id equals: mapping("parent_id")
+  }
+}
+{code}
+
+is a rather contrived scope that essentially restricts the results to meeting the criteria that personInstance.id is in the list of id's generated by the subquery which has the restraint that the subquery id equals the id of the outer subquery. Which would, of course, be true for every entry in the Person table.
+
+h4. Querying across associations:
+
+The comparator "where" is used to query across associations. For example:
+
+{code}
+Person.where {
+  friends where: {
+    isFriendly equals: true
+  }
+}
+{code}
+
+would restrict across the hasMany association "friends" to restrict the root set to all entries that have a friend that is friendly. Note: across a one-to-one or belongs-to association, the SQL generated will used a JOIN to do this restriction. Across a has-many association, a non-correlated subquery will be generated instead. This feature solves two problems with a traditional JOIN across a has-many - 1. The root set could otherwise be non-unique, and more importantly 2. The collection produced by the join is actually restricted as well (rather than just the root entity set) when a JOIN is used across a has-many often leading to phantom bugs. For example, in the example above, if a JOIN where used, personInstance.friends would only include the person's friendly friends rather than all of their friends, friendly or not.
+
+
+h4. Logical grouping:
+
+RelationalScope supports "not", "and", and "or" grouping of restriction expressions. By default, the restrictions expressed in a scope are grouped by the logical AND, but this may be changed as in the following example:
+
+{code}
+Person.where {
+  or {
+    email equals: "bob@me.com"
+    email equals: "bobsfriend@me.com"
+  }
+}
+{code}
+
+h4. Chaining scopes:
+
+Any instance of RelationalScope can be chained to further restrict the scope by calling "where()" on the instance. The semantics are identical to the method of the same name injected onto Domain classes. Also, the method "where()" can be used in the same way inside a scope builder.
+
+
+h4. Query Execution
+
+In order to allow restriction chaining and intelligent querying, RelationalScope objects are lazily executed. In order to retrieve the actual results, one must call one of the following methods:
+
+* all() - Causes query execution and caches the results in the scope object for use in subsequent calls to this method.
+* all(true) - Forces (re)execution of the query; otherwise acts identically to the plain "all()"
+* find() - Executes a query expecting a unique result, returning and caching that result for subsequent calls to this method.
+* find(true) - Forces a (re)executing of the query; otherwise acts identically to the plain "find()"
+* first() - Shortcut that calls "all()" and returns the first entry in the result set. Unlike the typical Groovy "first()" method, however, if now results were returned by the query, "null" is returned.
+
+
+h4. Querying Shortcut:
+
+RelationalScope also injects a shortcut method "getAt" onto each Domain class so that one may easily use RelationalScope to fetch a single instance by ID. For example,
+
+{code}
+Person[235]
+{code}
+
+would retrieve the person record with an ID of 235. Note that this shortcut also bypasses the standard lazy querying.
+
+
+h4. Selection:
+
+Sometimes you may desire to only retrieve certain value(s) - or even calculated values - rather than instances of your domain class from your query. The most obvious example of this is when creating a subquery where a single column needs to be returned. This is accomplished by calling the "select()" method on an instance of RelationalScope. This method takes a single closure as an argument - as a builder. Several method calls are available inside the builder closure context to support collection. For example:
+
+{code}
+Person.where {
+  ...
+}.select {
+  id()
+}
+{code}
+
+would build a query that only selects the identifier property from the Person table. The following is a full list of the methods available:
+
+* Property selection: property("propertyName")
+* Identifier selection: id()
+* Maximum selection: max("propertyName")
+* Minimum selection: min("propertyName")
+* Summation selection: sum("propertyName")
+* Average selection: average("propertyName")
+* Count selection: count("propertyName")
+
+{note}
+  Note: The "count()" call may also wrap a distinct() call.
+{note}
+
+* Distinct selection: distinct("propertyName")
+
+{note}
+  Note: "distinct()" may also used to wrapped any other selection method call.
+{note}
+
+h4. Ordering:
+
+Each RelationalScope object has a method "order()" which accepts as its parameters a property name and then a direction where direction is either "asc" or "desc". If not specified, direction defaults to "asc". For example:
+
+{code}
+Person.where {
+  ...
+}.order("email")
+{code}
+
+would create a query that is ordered by the email property. As with every other RelationalScope method, "order()" is chainable to support nested ordering.
+
+
+h4. Take/skip:
+
+To support SQL's TOP/LIMIT/FIRST/OFFSET functionality, RelationalScope implements the "take()" and "skip()" methods. Each take an integer as their sole parameter and chain on to RelationalScope instances.
+
+
+h4. Default scopes:
+
+One big feature of RelationalScope is the ability to define default scopes on Domain classes. RelationalScope injects two other support methods onto all Domain classes: "blankScope()" and "defaultScope()". The "where()" method on the Domain class actually calls "defaultScope()" to get the scope instance onto which it will chain its restrictions. The method "blankScope()" is implemented to always return a plain instance of RelationalScope. By defining the method "defaultScope()" on a domain class one may add default restrictions to any domain class. If you choose to override this functionality, you will want to call "blankScope()" inside of your "defaultScope()" implementation (rather than "where()") in order to not create an infinite indirect recursion loop. Also, anywhere where you desire to override the "defaultScope()" implementation you may call "blankScope()" on your Domain class to get your base scope and then chain your "where()" calls onto that scope.

@@ -28,7 +28,48 @@ Feature: Sub-queries
       | Customer  |
     When I execute the code "Customer.where { exists( Account.where { } )}.all()"
     Then I should get the following results:
-    | name    |
-    | Bob     |
-    | Elsie   |
-    
+      | name    |
+      | Bob     |
+      | Elsie   |
+  
+  Scenario: Query using 'in' subquerying
+    Given I have the following domain class:
+      """
+      class Book {
+        String title
+        String author
+      }
+      """
+    Given I have the following domain class:
+      """
+      class Author {
+        String name
+      }
+      """
+    And I have created the following "Book" instances:
+      | title                       | author     |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    When I execute the following code:
+      """
+      Book.where {
+        author 'in': Author.where { }.select { property("name") }
+      }.all()
+      """
+    Then I should get the following results:
+      | title |
+    Given I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    When I execute the following code:
+      """
+      Book.where {
+        author 'in': Author.where {
+          name equals: "Tolkien"
+        }.select { property("name") }
+      }.all()
+      """
+    Then I should get the following results:
+      | title              |
+      | Lord of the Rings  |
