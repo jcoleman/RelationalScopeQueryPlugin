@@ -141,7 +141,7 @@ class RelationalScopeBuilder {
       }
     } else {
       relation.associationName = associationName
-      _project_(relation , args)
+      _project_(relation, args)
     }
   }
   
