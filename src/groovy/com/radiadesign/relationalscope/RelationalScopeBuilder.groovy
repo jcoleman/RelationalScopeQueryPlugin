@@ -124,7 +124,7 @@ class RelationalScopeBuilder {
     }
     
     def referencedDomainClass = domainProperty.referencedDomainClass
-    def relation = new RelationalScope(referencedDomainClass)
+    def relation = referencedDomainClass.clazz.defaultScope()
     
     if (domainProperty.isOneToMany()) {
       if (domainProperty.referencedPropertyName == null) {
