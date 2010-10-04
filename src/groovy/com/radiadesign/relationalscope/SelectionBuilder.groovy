@@ -31,6 +31,10 @@ class SelectionBuilder {
   def sum(String propertyName) {
     _addSelection_( new SummationSelection(propertyName) )
   }
+
+  def groupBy(String propertyName) {
+    _addSelection_( new GroupingSelection(propertyName) )
+  }
   
   def average(String propertyName) {
     _addSelection_( new AverageSelection(propertyName) )
