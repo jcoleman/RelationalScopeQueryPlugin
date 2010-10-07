@@ -59,6 +59,8 @@ class SelectionBuilder {
     } else {
       _selections_ << selection
     }
+    
+    return selection
   }
   
 }

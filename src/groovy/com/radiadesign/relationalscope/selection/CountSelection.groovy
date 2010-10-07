@@ -14,10 +14,10 @@ class CountSelection extends AbstractSelection {
   
   Projection toProjection() {
     if (property instanceof DistinctSelection) {
-      if (property.property instanceof String) {
-        Projections.countDistinct(property.property)
+      if (property.property.property instanceof String) {
+        Projections.countDistinct(property.property.property)
       } else {
-        throw new RuntimeException("count(distinct(property)) expected property to be a String, got value ${property.property}")
+        throw new RuntimeException("count(distinct(property)) expected property.property.property to be a String, got value ${property.property.property}")
       }
     } else if (property instanceof String) {
       Projections.count(property)
