@@ -38,13 +38,17 @@ Given /^I have created the following "([^\"]*)" graph:$/ do |klass, graph|
   instances.each do |instance|
     # Find all the properties of this instance that are themselves
     # hashes. These represent relationships.
-    relationship_keys = instance.keys.find_all do |key|
+    references_relationship_keys = instance.keys.find_all do |key|
       instance[key].respond_to? :keys
+    end
+    
+    has_many_relationship_keys = instance.keys.find_all do |key|
+      instance[key].respond_to? :at
     end
     
     # Now, pull the values of these relationships out
     # of the original instances. We'll link everything up later.
-    relationships = relationship_keys.collect do |key|
+    relationship_transformer = lambda do |key|
       # We want relationships that include the property name, like this:
       target = (instance.delete key)
       target_class = target.delete "class"
@@ -55,11 +59,21 @@ Given /^I have created the following "([^\"]*)" graph:$/ do |klass, graph|
         :identifying_value => identifier[1] }
     end
     
+    references_relationships = references_relationship_keys.collect relationship_transformer
+    has_many_relationships = 
+    has_many_relationship_keys.inject do |collection, key|
+      instance[key].each do |rel|
+        collection << relationship_transformer.call(rel)
+      end
+      collection
+    end
+    
     # Actually create the object
     instance[:actual] = create_instance_from_hash klass, instance
     
     # Now that it's created, we can add back the relationship key
-    instance[:relationships] = relationships
+    instance[:references_relationships] = references_relationships
+    instance[:references_relationships] = references_relationships
   end
   
   # Now, go back and create all the relationships using
@@ -113,5 +127,6 @@ Then /^I should get the following results(, in order)?:$/ do |order, instances|
   #  end
   #end
   
+  thinned_result.size.should == instances.hashes.size
   Set.new(thinned_result).to_a.should include(*Set.new(instances.hashes).to_a)
 end
