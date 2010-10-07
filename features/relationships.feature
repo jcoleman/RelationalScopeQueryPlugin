@@ -127,4 +127,4 @@ Feature: Relationship queries
     Then I should get the following results:
       | name    |
       | Nancy   |
-      | Jeff  |
+      | Jeff    |
