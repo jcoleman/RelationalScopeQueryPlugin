@@ -86,7 +86,7 @@ class RelationalScope {
   def order(property, direction = 'asc') {
     direction = direction.toLowerCase()
     if (!(direction.startsWith('asc') || direction.startsWith('desc'))) {
-      throw RuntimeException("Order by direction '${direction}' is invalid. Use 'asc' or 'desc'.")
+      throw new RuntimeException("Order by direction '${direction}' is invalid. Use 'asc' or 'desc'.")
     }
     
     def newScope = clone()
