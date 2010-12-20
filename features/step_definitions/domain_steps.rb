@@ -59,7 +59,7 @@ Given /^I have created the following "([^\"]*)" graph:$/ do |klass, graph|
         :identifying_value => identifier[1] }
     end
     
-    references_relationships = references_relationship_keys.collect relationship_transformer
+    references_relationships = references_relationship_keys.collect &relationship_transformer
     has_many_relationships = 
     has_many_relationship_keys.inject do |collection, key|
       instance[key].each do |rel|
@@ -73,14 +73,13 @@ Given /^I have created the following "([^\"]*)" graph:$/ do |klass, graph|
     
     # Now that it's created, we can add back the relationship key
     instance[:references_relationships] = references_relationships
-    instance[:references_relationships] = references_relationships
   end
   
   # Now, go back and create all the relationships using
   # what Ryan calls "grand assumptions."
   instances.each do |instance|
     actual = instance[:actual]
-    instance[:relationships].each do |relationship|
+    instance[:references_relationships].each do |relationship|
       @grails.execute <<-EOF
         def instance = #{klass}.get(#{actual["id"]})
         instance.#{relationship[:property]} = #{relationship[:property_class]}.findBy#{relationship[:identifying_property].first_letter_capitalize}(#{relationship[:identifying_value].inspect})
