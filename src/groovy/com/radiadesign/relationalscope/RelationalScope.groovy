@@ -302,18 +302,16 @@ class RelationalScope {
     options.isDetachedCriteria ? "sqjn_${options.getDetachedCriteriaCount()}" : 'rtjn'
   }
   
-  def createAssociationAliasIfNecessary(options, associationPath) {
-    if (associationName) {
-      def discriminator = RelationalScope.aliasDiscriminatorFor(options)
-      def aliasMap = options.associationAliases[discriminator]
-      if (!aliasMap) {
-        aliasMap = options.associationAliases[discriminator] = [:]
-      }
-      if (!aliasMap[associationPath]) {
-        def alias = "${discriminator}_${associationPath.replace('.', '_')}"
-        options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
-        aliasMap[associationPath] = alias
-      }
+  static createAssociationAliasIfNecessary(options, associationPath) {
+    def discriminator = RelationalScope.aliasDiscriminatorFor(options)
+    def aliasMap = options.associationAliases[discriminator]
+    if (!aliasMap) {
+      aliasMap = options.associationAliases[discriminator] = [:]
+    }
+    if (!aliasMap[associationPath]) {
+      def alias = "${discriminator}_${associationPath.replace('.', '_')}"
+      options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
+      aliasMap[associationPath] = alias
     }
   }
   
@@ -321,7 +319,9 @@ class RelationalScope {
     def currentAssociationPath = fullAssociationPath(options.associationPath)
     
     // Do we need to create new alias?
-    createAssociationAliasIfNecessary(options, currentAssociationPath)
+    if (associationName) {
+      RelationalScope.createAssociationAliasIfNecessary(options, currentAssociationPath)
+    }
     
     def newOptions = options + [associationPath: currentAssociationPath]
     if (scopes.size() == 1) {
