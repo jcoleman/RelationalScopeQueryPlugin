@@ -87,6 +87,21 @@ Feature: Queries selecting specific properties and turning the results into a li
       | Harold      | male          |
       | Jeff        | male          |
       | Nancy       | female        |
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        // Provide a "hint" to relscope to make the join by querying on the deep property
+        bestFriend where: {
+          name is: notNull
+        }
+      }.select(
+        "test": { distinct("gender") }
+      ).all()
+      """
+    Then I should get exactly the following result maps:
+      | test   |
+      | male   |
+      | female |
   
   Scenario: Select deep properties
     Given I have created the following "FriendlyPerson" graph:
