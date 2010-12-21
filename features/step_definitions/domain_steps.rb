@@ -129,3 +129,16 @@ Then /^I should get the following results(, in order)?:$/ do |order, instances|
   thinned_result.size.should == instances.hashes.size
   Set.new(thinned_result).to_a.should include(*Set.new(instances.hashes).to_a)
 end
+
+Then /^I should get exactly the following result maps(, in order)?:$/ do |order, instances|
+  result = @result.collect do |instance|
+    stringified_instance = Hash.new
+    instance.each do |key, value|
+      stringified_instance[key] = value ? value.to_s : value
+    end
+    stringified_instance
+  end
+  
+  result.size.should == instances.hashes.size
+  Set.new(result).to_a.should include(*Set.new(instances.hashes).to_a)
+end

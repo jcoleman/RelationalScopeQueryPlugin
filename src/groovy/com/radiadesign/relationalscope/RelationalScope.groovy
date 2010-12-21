@@ -12,6 +12,7 @@ class RelationalScope {
   String associationName
   def scopes = []
   def selections = []
+  def selectionKeys = []
   
   def skipCount
   def takeCount
@@ -43,6 +44,7 @@ class RelationalScope {
     scopes = scope.scopes.clone()
     grailsDomainClass = scope.grailsDomainClass
     selections = scope.selections.clone()
+    selectionKeys = scope.selectionKeys.clone()
     takeCount = scope.takeCount
     skipCount = scope.skipCount
     orderBy = scope.orderBy.clone()
@@ -68,19 +70,53 @@ class RelationalScope {
     return this.where(block.relationalScope)
   }
   
-  def select(ArrayList _selections) {
+  def select(ArrayList _selections, ArrayList _selectionKeys=[]) {
     def newScope = this.clone()
     newScope.selections += _selections
+    newScope.selectionKeys += _selectionKeys
     return newScope
   }
   
   def select(Closure block) {
+    if (selectionKeys.size() > 0) {
+      throw new RuntimeException("Invalid use of scope.select(Closure) after use of scope.select(Map)")
+    }
+    
     def builder = new SelectionBuilder()
     block = block.clone()
     block.delegate = builder
     block.resolveStrategy = Closure.DELEGATE_FIRST
     block.call()
     return this.select(builder._selections_)
+  }
+  
+  // param _selections is a map with each entry in one the following formats:
+  //   <result-key-name>: "propertyName"
+  //   <result-key-name>: "association.propertyName"
+  //   <result-key-name>: { selection builder } // e.g. { min("propertyName") }
+  def select(Map _selections) {
+    if (selectionKeys.size() != selections.size()) {
+      throw new RuntimeException("Invalid use of scope.select(Map) after use of scope.select(Closure)")
+    }
+    
+    def _selectionKeys = []
+    def builder = new SelectionBuilder()
+    _selections.each { kv ->
+      if (kv.value instanceof Closure) {
+        def block = kv.value.clone()
+        block.delegate = builder
+        block.resolveStrategy = Closure.DELEGATE_FIRST
+        block.call()
+      } else if (kv.value instanceof String || kv.value instanceof GString) {
+        builder.property(kv.value)
+      } else {
+        throw new RuntimeException("Invalid use of scope.select(Map): each key-value pair's value must be a Closure, String, or GString")
+      }
+      
+      _selectionKeys << kv.key
+    }
+    
+    return this.select(builder._selections_, _selectionKeys)
   }
 
   def order(property, direction = 'asc') {
@@ -165,14 +201,53 @@ class RelationalScope {
     return criteria
   }
   
+  def mapifySelectionList(fields) {
+    def map = [:]
+    int len = selectionKeys.size()
+    for (int i = 0; i < len; ++i) {
+      map[selectionKeys[i]] = fields[i]
+    }
+    return map
+  }
+  
+  def mapifyResultsIfNecessary(results) {
+    if (selectionKeys.isEmpty()) {
+      return results
+    } else {
+      def maps = new ArrayList(results.size())
+      if (selectionKeys.size() > 1) {
+        for (result in results) {
+          maps << mapifySelectionList(result)
+        }
+      } else {
+        for (result in results) {
+          maps << mapifySelectionList([result])
+        }
+      }
+      return maps
+    }
+  }
+  
+  def mapifyResultIfNecessary(result) {
+    if (selectionKeys.isEmpty()) {
+      return result
+    } else {
+      if (selectionKeys.size() > 1) {
+        return mapifySelectionList(result)
+      } else {
+        return mapifySelectionList([result])
+      }
+    }
+  }
+  
   def executeQuery(unique) {
     def criteria = executableCriteria(unique)
     if (unique) {
       resultIsSet = true
-      result = criteria.uniqueResult()
+      result = mapifyResultIfNecessary( criteria.uniqueResult() )
     } else {
       resultsIsSet = true
-      results = criteria.list()
+      results = mapifyResultsIfNecessary( criteria.list() )
     }
   }
 
