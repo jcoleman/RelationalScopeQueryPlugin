@@ -73,6 +73,20 @@ Feature: Queries selecting specific properties and turning the results into a li
       | Harold      | male          |
       | Jeff        | male          |
       | Nancy       | female        |
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        // No restrictions for this test
+      }.select(
+        "person.name":"name",
+        "person.gender": { property("gender") }
+      ).all()
+      """
+    Then I should get exactly the following result maps:
+      | person.name | person.gender |
+      | Harold      | male          |
+      | Jeff        | male          |
+      | Nancy       | female        |
   
   Scenario: Select deep properties
     Given I have created the following "FriendlyPerson" graph:
