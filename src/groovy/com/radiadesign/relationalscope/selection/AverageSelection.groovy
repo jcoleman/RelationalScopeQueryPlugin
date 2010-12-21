@@ -8,8 +8,8 @@ class AverageSelection extends AbstractSelection {
     super(_propertyName)
   }
   
-  Projection toProjection() {
-    Projections.avg(property)
+  Projection toProjection(options) {
+    Projections.avg( AbstractSelection.propertyFor(options, property) )
   }
   
 }

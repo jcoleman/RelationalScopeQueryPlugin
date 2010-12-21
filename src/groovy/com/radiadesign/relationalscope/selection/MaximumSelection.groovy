@@ -8,8 +8,8 @@ class MaximumSelection extends AbstractSelection {
     super(_propertyName)
   }
   
-  Projection toProjection() {
-    Projections.max(property)
+  Projection toProjection(options) {
+    Projections.max( AbstractSelection.propertyFor(options, property) )
   }
   
 }

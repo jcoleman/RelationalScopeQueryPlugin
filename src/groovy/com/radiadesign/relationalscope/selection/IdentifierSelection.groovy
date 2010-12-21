@@ -8,7 +8,7 @@ class IdentifierSelection extends AbstractSelection {
     super(null)
   }
   
-  Projection toProjection() {
+  Projection toProjection(options) {
     Projections.id()
   }
   

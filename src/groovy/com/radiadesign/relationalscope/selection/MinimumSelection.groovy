@@ -8,8 +8,8 @@ class MinimumSelection extends AbstractSelection {
     super(_propertyName)
   }
   
-  Projection toProjection() {
-    Projections.min(property)
+  Projection toProjection(options) {
+    Projections.min( AbstractSelection.propertyFor(options, property) )
   }
   
 }

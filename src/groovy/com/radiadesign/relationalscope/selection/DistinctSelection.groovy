@@ -8,7 +8,7 @@ class DistinctSelection extends AbstractSelection {
     super(_property)
   }
   
-  Projection toProjection() {
+  Projection toProjection(options) {
     Projections.distinct(property.toProjection())
   }
   

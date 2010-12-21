@@ -263,7 +263,7 @@ class RelationalScope {
       criteria.add(criterion)
     }
     
-    def projection = toProjection()
+    def projection = toProjection(options)
     if (projection) {
       criteria.setProjection(projection)
     }
@@ -341,15 +341,15 @@ class RelationalScope {
     }
   }
   
-  Projection toProjection() {
+  Projection toProjection(options) {
     if (selections.empty) {
       return null
     } else {
       if (selections.size() == 1) {
-        return selections.first().toProjection()
+        return selections.first().toProjection(options)
       } else {
         return selections.inject(Projections.projectionList()) { projection, selection ->
-          projection.add(selection.toProjection())
+          projection.add(selection.toProjection(options))
         }
       }
     }

@@ -8,8 +8,8 @@ class PropertySelection extends AbstractSelection {
     super(_propertyName)
   }
   
-  Projection toProjection() {
-    Projections.property(property)
+  Projection toProjection(options) {
+    Projections.property( AbstractSelection.propertyFor(options, property) )
   }
   
 }

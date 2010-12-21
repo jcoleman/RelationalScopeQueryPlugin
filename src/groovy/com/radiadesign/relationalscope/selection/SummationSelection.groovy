@@ -8,8 +8,8 @@ class SummationSelection extends AbstractSelection {
     super(_propertyName)
   }
   
-  Projection toProjection() {
-    Projections.sum(property)
+  Projection toProjection(options) {
+    Projections.sum( AbstractSelection.propertyFor(options, property) )
   }
   
 }
