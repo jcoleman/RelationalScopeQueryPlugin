@@ -162,35 +162,3 @@ Feature: Queries selecting specific properties and turning the results into a li
       | Jeff   |
       | Nancy  |
       | Jeff   |
-  
-  Scenario: Query with grouping mapped selection of aggregrate values
-    Given I have the following domain class:
-      """
-      class NumberDomain {
-        BigInteger x
-        BigInteger y
-
-        static constraints = {
-          y nullable: true
-        }
-      }
-      """
-    And I have created the following "NumberDomain" instances:
-      | x   | y   |
-      | 1   | 2   |
-      | 1   | 4   |
-      | 2   | 4   |
-      | 2   | 8   |
-    When I execute the following code:
-      """
-      NumberDomain.where {
-        // No restrictions
-      }.select(
-        x: "x",
-        "y_average": { average("y") }
-      ).group("x").all()
-      """
-    Then I should get the following results:
-      | x    | y_average |
-      | 1    | 3         |
-      | 2    | 6         |

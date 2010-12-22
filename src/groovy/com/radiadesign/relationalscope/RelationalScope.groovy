@@ -1,7 +1,6 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
-import com.radiadesign.relationalscope.selection.GroupingSelection
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 class RelationalScope {
@@ -14,7 +13,6 @@ class RelationalScope {
   def scopes = []
   def selections = []
   def selectionKeys = []
-  def groupings = []
   
   def skipCount
   def takeCount
@@ -47,7 +45,6 @@ class RelationalScope {
     grailsDomainClass = scope.grailsDomainClass
     selections = scope.selections.clone()
     selectionKeys = scope.selectionKeys.clone()
-    groupings = scope.groupings.clone()
     takeCount = scope.takeCount
     skipCount = scope.skipCount
     orderBy = scope.orderBy.clone()
@@ -120,20 +117,6 @@ class RelationalScope {
     }
     
     return this.select(builder._selections_, _selectionKeys)
-  }
-  
-  def group(Object[] parameters) {
-    def _groupings = parameters.collect { parameter ->
-      if (!(parameter instanceof String || parameter instanceof GString)) {
-        throw new RuntimeException("Each parameter to scope.group(...) must be of type String")
-      }
-      
-      return new GroupingSelection(parameter)
-    }
-    
-    def newScope = this.clone()
-    newScope.groupings += _groupings
-    return newScope
   }
 
   def order(property, direction = 'asc') {
@@ -359,14 +342,13 @@ class RelationalScope {
   }
   
   Projection toProjection(options) {
-    def projections = selections + groupings
-    if (projections.empty) {
+    if (selections.empty) {
       return null
     } else {
-      if (projections.size() == 1) {
-        return projections.first().toProjection(options)
+      if (selections.size() == 1) {
+        return selections.first().toProjection(options)
       } else {
-        return projections.inject(Projections.projectionList()) { projection, selection ->
+        return selections.inject(Projections.projectionList()) { projection, selection ->
           projection.add(selection.toProjection(options))
         }
       }
