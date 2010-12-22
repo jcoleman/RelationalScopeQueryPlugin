@@ -145,8 +145,10 @@ class RelationalScopeBuilder {
     }
   }
   
-  // Helper property for 'is' comparison
-  final notNull = 1
+  // Helper properties for 'is' comparison
+  static final notNull = 1
+  static final empty = 2
+  static final notEmpty = 3
   
   def getRelationalScope() {
     return _scope_
