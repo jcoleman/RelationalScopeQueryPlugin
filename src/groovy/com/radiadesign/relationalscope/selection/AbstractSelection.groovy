@@ -27,7 +27,16 @@ class AbstractSelection {
     }
     
     if (associationPath) {
-      RelationalScope.createAssociationAliasIfNecessary(options, associationPath)
+      def associations = associationPath.tokenize('.')
+      def path = associations[0]
+      RelationalScope.createAssociationAliasIfNecessary(options, path)
+      
+      if (associations.size() > 1) {
+        associations[1..-1].each { association ->
+          path += ".${association}"
+          RelationalScope.createAssociationAliasIfNecessary(options, path)
+        }
+      }
       
       def discriminator = RelationalScope.aliasDiscriminatorFor(options)
       def discriminatedAliases = options.associationAliases[discriminator]

@@ -162,6 +162,19 @@ Feature: Queries selecting specific properties and turning the results into a li
       | Jeff   |
       | Nancy  |
       | Jeff   |
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        // Don't provide any hints for joining (should work either way)
+      }.select(
+        "name":"bestFriend.bestFriend.name"
+      ).all()
+      """
+    Then I should get exactly the following result maps:
+      | name   |
+      | Nancy  |
+      | Jeff   |
+      | Nancy  |
   
   Scenario: Query with grouping mapped selection of aggregrate values
     Given I have the following domain class:
