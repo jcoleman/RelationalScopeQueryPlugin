@@ -61,6 +61,18 @@ class RelationalScope {
     return newScope
   }
   
+  def where(ArrayList additionalScopes) {
+    def newScope = this.clone()
+    additionalScopes.each { additionalScope ->
+      if (!additionalScope instanceof RelationalScope) {
+        throw new RuntimeException("scope.where(ArrayList) expects each item to be an instance of RelationalScope. Instead found ${additionalScope?.getClass()}")
+      }
+      
+      newScope.addScopeOrComparison(additionalScope)
+    }
+    return newScope
+  }
+  
   def where(Closure block) {
     def builder = new RelationalScopeBuilder(instance())
     block = block.clone()
@@ -176,7 +188,11 @@ class RelationalScope {
   // --------------------------------------------------------------------------
   
   def addScopeOrComparison(additionalScope) {
-    scopes << additionalScope
+    if (this.class == RelationalScope && this.class == additionalScope.class) {
+      scopes += additionalScope.scopes
+    } else {
+      scopes << additionalScope
+    }
   }
   
   Class getDomainKlass() {
