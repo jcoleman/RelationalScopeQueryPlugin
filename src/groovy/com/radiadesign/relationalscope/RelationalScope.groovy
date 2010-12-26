@@ -62,14 +62,28 @@ class RelationalScope {
   }
   
   def where(ArrayList additionalScopes) {
+    def builder
     def newScope = this.clone()
+    
     additionalScopes.each { additionalScope ->
-      if (!additionalScope instanceof RelationalScope) {
-        throw new RuntimeException("scope.where(ArrayList) expects each item to be an instance of RelationalScope. Instead found ${additionalScope?.getClass()}")
+      if (additionalScope instanceof RelationalScope) {
+        newScope.addScopeOrComparison(additionalScope)
+      } else if (additionalScope instanceof Closure) {
+        if (!builder) { builder = new RelationalScopeBuilder(instance()) }
+        
+        additionalScope = additionalScope.clone()
+        additionalScope.delegate = builder
+        additionalScope.resolveStrategy = Closure.DELEGATE_FIRST
+        additionalScope.call()
+      } else {
+        throw new RuntimeException("scope.where(ArrayList) expects each item to be an instance of RelationalScope or Closure. Instead found ${additionalScope?.getClass()}")
       }
-      
-      newScope.addScopeOrComparison(additionalScope)
     }
+    
+    if (builder) {
+      newScope.addScopeOrComparison(builder.relationalScope)
+    }
+    
     return newScope
   }
   
