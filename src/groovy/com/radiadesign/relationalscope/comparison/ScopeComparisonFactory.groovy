@@ -14,8 +14,12 @@ class ScopeComparisonFactory {
     equals(lhs, rhs)
   }
   
-  static ne(lhs, rhs) {
+  static notEquals(lhs, rhs) {
     new NotEqualsScopeComparison(lhs, rhs)
+  }
+  
+  static ne(lhs, rhs) {
+    notEquals(lhs, rhs)
   }
 
   static is(lhs, rhs) {
