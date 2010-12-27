@@ -202,7 +202,9 @@ class RelationalScope {
   // --------------------------------------------------------------------------
   
   def addScopeOrComparison(additionalScope) {
-    if (this.class == RelationalScope && this.class == additionalScope.class) {
+    if ( this.class == RelationalScope
+         && this.class == additionalScope.class
+         && this.associationName == additionalScope.associationName ) {
       scopes += additionalScope.scopes
     } else {
       scopes << additionalScope
