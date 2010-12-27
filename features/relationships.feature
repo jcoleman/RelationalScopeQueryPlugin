@@ -128,3 +128,67 @@ Feature: Relationship queries
       | name    |
       | Nancy   |
       | Jeff    |
+  
+  Scenario: Query for children
+    Given I have created the following "MarriedPerson" graph:
+      """
+        [
+          {
+            "name": "Harold",
+            "gender": "male",
+            "age": 18,
+            "spouse": {
+              "class": "MarriedPerson",
+              "name": "Maude"
+            }
+          },
+          {
+            "name": "Maude",
+            "gender": "female",
+            "age": 57
+          },
+          {
+            "name": "Jeff",
+            "gender": "male",
+            "age": 26,
+            "spouse": {
+              "class": "MarriedPerson",
+              "name": "Nancy"
+            }
+          },
+          {
+            "name": "Nancy",
+            "gender": "female",
+            "age": 24,
+            "spouse": {
+              "class": "MarriedPerson",
+              "name": "Jeff"
+            }
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      MarriedPerson.where( [
+        {
+          name is: notNull
+        },
+        {
+          spouse where: {
+            age gte: 25
+          }
+        },
+        {
+          name is: notNull
+        },
+        {
+          spouse where: {
+            age is: notNull
+          }
+        }
+      ] ).all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Nancy   |
+      | Harold  |

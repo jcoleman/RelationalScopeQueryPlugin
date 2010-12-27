@@ -160,3 +160,29 @@ Feature: Basic queries
       | Gregory |
       | Sally   |
       | Harold  |
+  
+  Scenario: Query with list of scopes
+    Given I have created the following "Person" instances:
+      | name    | email         |
+      | Gregory | greg@me.com   |
+      | Sally   | sally@me.com  |
+    Given I have created the following "Person" instances:
+      | name    |
+      | Bob     |
+    Given I have created the following "Person" instances:
+      | name    | email       | email2      |
+      | Tim     | tim@me.com  | tim@me.com  |
+    Given I have created the following "Person" instances:
+      | name    | email2         |
+      | Harold  | harold@me.com  |
+    When I execute the following code:
+      """
+      Person.where( [
+        { email ne: property("email2") },
+        { email is: notNull }
+      ] ).all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+      | Sally   |
