@@ -14,4 +14,44 @@ class ExpressionBase {
     builder._processArgs_(this, args)
   }
   
+  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
+    throw new RuntimeException("Please implement getSqlStringForHibernate() in the extending class.")
+  }
+  
+  ExpressionBase minus(ExpressionBase rhs) {
+    return new ArithmeticExpression(this, rhs, '-', builder)
+  }
+  
+  ExpressionBase minus(Number val) {
+    def expr = new ValueExpression(val, builder)
+    minus(expr)
+  }
+  
+  ExpressionBase plus(ExpressionBase rhs) {
+    return new ArithmeticExpression(this, rhs, '+', builder)
+  }
+  
+  ExpressionBase plus(Number val) {
+    def expr = new ValueExpression(val, builder)
+    plus(expr)
+  }
+  
+  ExpressionBase multiply(ExpressionBase rhs) {
+    return new ArithmeticExpression(this, rhs, '*', builder)
+  }
+  
+  ExpressionBase multiply(Number val) {
+    def expr = new ValueExpression(val, builder)
+    multiply(expr)
+  }
+  
+  ExpressionBase div(ExpressionBase rhs) {
+    return new ArithmeticExpression(this, rhs, '/', builder)
+  }
+  
+  ExpressionBase div(Number val) {
+    def expr = new ValueExpression(val, builder)
+    div(expr)
+  }
+  
 }

@@ -60,6 +60,10 @@ class ScopeComparisonBase {
     throw new RuntimeException("Subquery-to-Value comparator not implemented on ${this.class.simpleName}.")
   }
   
+  Criterion criterionForExpressionAndExpression(lhs, rhs, options) {
+    throw new RuntimeException("Expression-to-Expression comparator not implemented on ${this.class.simpleName}.")
+  }
+  
   
   // --------------------------------------------------------------------------
   // Semi-private API: supports subquery comparisons
@@ -130,6 +134,12 @@ class ScopeComparisonBase {
     this.criterionForValueAndSubquery( this.detachedCriteriaFor(scope, options),
                                        val.value,
                                        options )
+  }
+  
+  Criterion _dispatchToCriterion_(ArithmeticExpression expr, ValueExpression val, options) {
+    this.criterionForExpressionAndExpression( expr,
+                                              val,
+                                              options )
   }
   
   

@@ -12,4 +12,8 @@ class ValueExpression extends ExpressionBase {
     value = _value
   }
   
+  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
+    return value.toString()
+  }
+  
 }
