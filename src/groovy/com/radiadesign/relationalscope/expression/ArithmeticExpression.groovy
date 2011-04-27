@@ -16,10 +16,12 @@ class ArithmeticExpression extends ExpressionBase {
     operator = _operator
   }
   
-  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
-    return ( '(' + lhs.getSqlStringForHibernate(criteria, criteriaQuery, options)
-             + ' ' + operator + ' '
-             + rhs.getSqlStringForHibernate(criteria, criteriaQuery, options) + ')' )
+  void appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options) {
+    lhs.appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options)
+    sqlWriter.append(' ')
+    sqlWriter.append(operator)
+    sqlWriter.append(' ')
+    rhs.appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options)
   }
   
 }

@@ -7,6 +7,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.TypedValue;
 import org.hibernate.util.StringHelper;
 import java.util.Map;
+import java.io.StringWriter;
 import com.radiadesign.relationalscope.expression.ExpressionBase;
 
 
@@ -28,15 +29,15 @@ public class ArbitraryExpressionCriterion implements Criterion {
 
   public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery)
   throws HibernateException {
-    return "(" + this.getLhsStringValue(criteria, criteriaQuery) + " " + operator + " " + this.getRhsStringValue(criteria, criteriaQuery) + ")";
-  }
-  
-  public String getLhsStringValue(Criteria criteria, CriteriaQuery criteriaQuery) {
-    return lhs.getSqlStringForHibernate(criteria, criteriaQuery, options);
-  }
-  
-  public String getRhsStringValue(Criteria criteria, CriteriaQuery criteriaQuery) {
-    return rhs.getSqlStringForHibernate(criteria, criteriaQuery, options);
+    StringWriter sqlWriter = new StringWriter();
+    sqlWriter.append('(');
+    lhs.appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options);
+    sqlWriter.append(' ');
+    sqlWriter.append(operator);
+    sqlWriter.append(' ');
+    rhs.appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options);
+    sqlWriter.append(')');
+    return sqlWriter.toString();
   }
   
   public static String getSingleColumnForPropertyName(String propertyName, Criteria criteria, CriteriaQuery criteriaQuery) {

@@ -12,8 +12,8 @@ class ValueExpression extends ExpressionBase {
     value = _value
   }
   
-  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
-    return value.toString()
+  void appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options) {
+    sqlWriter.append( value.toString() )
   }
   
 }

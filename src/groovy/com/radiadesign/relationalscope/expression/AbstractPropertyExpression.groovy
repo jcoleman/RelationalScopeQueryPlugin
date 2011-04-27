@@ -18,10 +18,12 @@ class AbstractPropertyExpression extends ExpressionBase {
     throw new RuntimeException("Please implement propertyFor() in the extending class.")
   }
   
-  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
-    return ArbitraryExpressionCriterion.getSingleColumnForPropertyName( propertyFor(options),
-                                                               criteria,
-                                                               criteriaQuery )
+  void appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options) {
+    sqlWriter.append(
+      ArbitraryExpressionCriterion.getSingleColumnForPropertyName( propertyFor(options),
+                                                                   criteria,
+                                                                   criteriaQuery )
+    )
   }
   
 }

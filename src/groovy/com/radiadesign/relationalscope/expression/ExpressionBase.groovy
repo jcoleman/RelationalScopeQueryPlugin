@@ -14,8 +14,8 @@ class ExpressionBase {
     builder._processArgs_(this, args)
   }
   
-  String getSqlStringForHibernate(criteria, criteriaQuery, options) {
-    throw new RuntimeException("Please implement getSqlStringForHibernate() in the extending class.")
+  void appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options) {
+    throw new RuntimeException("Please implement appendSqlStringForHibernate() in the extending class.")
   }
   
   ExpressionBase minus(ExpressionBase rhs) {
