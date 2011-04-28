@@ -3,7 +3,7 @@ Feature: Arithmetic queries
   As a developer
   I want to query using arithemetic expressions
   
-  Scenario: Query with basic subtraction (expression and value)
+  Scenario: Query with basic subtraction eq (expression and value)
     Given I have the following domain class:
       """
       class NumberDomain {
@@ -24,7 +24,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
-  Scenario: Query with 'chained' arithmetic (subtracting expression and value)
+  Scenario: Query with 'chained' arithmetic eq (subtracting expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -34,7 +34,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Addition (expression and value)
+  Scenario: Addition eq (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -44,7 +44,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Multiplication (expression and value)
+  Scenario: Multiplication eq (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -54,7 +54,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Division (expression and value)
+  Scenario: Division eq (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -64,7 +64,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Subtraction (value and expression)
+  Scenario: Subtraction eq (value and expression)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 1    |
@@ -74,7 +74,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
-  Scenario: Subtraction (expression and expression)
+  Scenario: Subtraction eq (expression and expression)
     Given I have created the following "NumberDomain" instances:
       | x    | y   |
       | 1    | 1   |
@@ -84,7 +84,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
-  Scenario: Subtraction (property and expression)
+  Scenario: Subtraction eq (property and expression)
     Given I have created the following "NumberDomain" instances:
       | x    | y   |
       | 1    | 0   |
@@ -94,7 +94,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
-  Scenario: Subtraction (expression and property)
+  Scenario: Subtraction eq (expression and property)
     Given I have created the following "NumberDomain" instances:
       | x    | y   |
       | 1    | 0   |
@@ -121,5 +121,51 @@ Feature: Arithmetic queries
   #  Then I should get the following results:
   #    | x    |
   #    | 1    |
+  
+  Scenario: Addition gte (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | 1    |
+      | 2    |
+      | 3    |
+    When I execute the code "NumberDomain.where { (property('x') + 1) gte: 3 }.all()"
+    Then I should get the following results:
+      | x    |
+      | 2    |
+      | 3    |
+  
+  Scenario: Addition gt (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | 1    |
+      | 2    |
+      | 3    |
+    When I execute the code "NumberDomain.where { (property('x') + 1) gt: 3 }.all()"
+    Then I should get the following results:
+      | x    |
+      | 3    |
+  
+  Scenario: Addition lte (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | 1    |
+      | 2    |
+      | 3    |
+    When I execute the code "NumberDomain.where { (property('x') + 1) lte: 3 }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 2    |
+  
+  Scenario: Addition lt (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | 1    |
+      | 2    |
+      | 3    |
+    When I execute the code "NumberDomain.where { (property('x') + 1) lt: 3 }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
   
   

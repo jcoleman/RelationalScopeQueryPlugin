@@ -2,6 +2,7 @@ package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
 import com.radiadesign.relationalscope.expression.*
+import com.radiadesign.hibernate.criterion.ArbitraryExpressionCriterion
 
 class LessThanScopeComparison extends ScopeComparisonBase {
   
@@ -27,6 +28,10 @@ class LessThanScopeComparison extends ScopeComparisonBase {
   
   Criterion criterionForValueAndSubquery(value, criteria, options) {
     Subqueries.lt(value, criteria)
+  }
+  
+  Criterion  criterionForExpressionAndExpression(lhs, rhs, options) {
+    new ArbitraryExpressionCriterion(lhs, rhs, '<', options)
   }
   
   String toString() {
