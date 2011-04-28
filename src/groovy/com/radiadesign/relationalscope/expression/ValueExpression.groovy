@@ -3,6 +3,8 @@ package com.radiadesign.relationalscope.expression
 import com.radiadesign.relationalscope.RelationalScopeBuilder
 import com.radiadesign.relationalscope.RelationalScope
 
+import  org.hibernate.type.TypeFactory
+
 class ValueExpression extends ExpressionBase {
   
   def value
@@ -10,10 +12,6 @@ class ValueExpression extends ExpressionBase {
   ValueExpression(_value, RelationalScopeBuilder _builder) {
     super(_builder)
     value = _value
-  }
-  
-  void appendSqlStringForHibernate(sqlWriter, criteria, criteriaQuery, options) {
-    sqlWriter.append( value.toString() )
   }
   
 }
