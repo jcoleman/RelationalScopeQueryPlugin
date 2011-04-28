@@ -136,10 +136,24 @@ class ScopeComparisonBase {
                                        options )
   }
   
+  Criterion _dispatchToCriterion_(ArithmeticExpression expr1, ArithmeticExpression expr2, options) {
+    this.criterionForExpressionAndExpression(expr1, expr2, options)
+  }
+  
   Criterion _dispatchToCriterion_(ArithmeticExpression expr, ValueExpression val, options) {
-    this.criterionForExpressionAndExpression( expr,
-                                              val,
-                                              options )
+    this.criterionForExpressionAndExpression(expr, val, options)
+  }
+  
+  Criterion _dispatchToCriterion_(ValueExpression val, ArithmeticExpression expr, options) {
+    this.criterionForExpressionAndExpression(val, expr, options)
+  }
+  
+  Criterion _dispatchToCriterion_(ArithmeticExpression expr, AbstractPropertyExpression prop, options) {
+    this.criterionForExpressionAndExpression(expr, prop, options)
+  }
+  
+  Criterion _dispatchToCriterion_(AbstractPropertyExpression prop, ArithmeticExpression expr, options) {
+    this.criterionForExpressionAndExpression(prop, expr, options)
   }
   
   
