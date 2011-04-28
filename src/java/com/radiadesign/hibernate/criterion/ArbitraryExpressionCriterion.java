@@ -37,11 +37,15 @@ public class ArbitraryExpressionCriterion implements Criterion {
   throws HibernateException {
     StringWriter sqlWriter = new StringWriter();
     sqlWriter.append('(');
+    if (rhs == null) { sqlWriter.append('('); }
     appendSqlStringForExpression(lhs, sqlWriter, criteria, criteriaQuery);
+    if (rhs == null) { sqlWriter.append(')'); }
     sqlWriter.append(' ');
     sqlWriter.append(operator);
-    sqlWriter.append(' ');
-    appendSqlStringForExpression(rhs, sqlWriter, criteria, criteriaQuery);
+    if (rhs != null) {
+      sqlWriter.append(' ');
+      appendSqlStringForExpression(rhs, sqlWriter, criteria, criteriaQuery);
+    }
     sqlWriter.append(')');
     return sqlWriter.toString();
   }
@@ -86,7 +90,9 @@ public class ArbitraryExpressionCriterion implements Criterion {
     ArrayList<Type> types = new ArrayList<Type>();
     ArrayList<Object> values = new ArrayList<Object>();
     addTypedValuesForExpression(lhs, types, values);
-    addTypedValuesForExpression(rhs, types, values);
+    if (rhs != null) {
+      addTypedValuesForExpression(rhs, types, values);
+    }
     TypedValue[] typedValues = new TypedValue[values.size()];
     for (int i = 0, len = values.size(); i < len; ++i) {
       typedValues[i] = new TypedValue(types.get(i), values.get(i), EntityMode.POJO);
