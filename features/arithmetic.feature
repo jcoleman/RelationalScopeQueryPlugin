@@ -3,7 +3,7 @@ Feature: Arithmetic queries
   As a developer
   I want to query using arithemetic expressions
   
-  Scenario: Query with basic subtraction (property and value)
+  Scenario: Query with basic subtraction (expression and value)
     Given I have the following domain class:
       """
       class NumberDomain {
@@ -24,7 +24,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
-  Scenario: Query with 'chained' arithmetic (subtracting property and value)
+  Scenario: Query with 'chained' arithmetic (subtracting expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -34,7 +34,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Addition (property and value)
+  Scenario: Addition (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -44,7 +44,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Multiplication (property and value)
+  Scenario: Multiplication (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -54,7 +54,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
   
-  Scenario: Division (property and value)
+  Scenario: Division (expression and value)
     Given I have created the following "NumberDomain" instances:
       | x    |
       | 2    |
@@ -103,6 +103,7 @@ Feature: Arithmetic queries
     Then I should get the following results:
       | x    |
       | 1    |
+  
   # The following test currently works (that is, it generates the correct SQL)
   # however, there is a bug in the HSQLDB that is used in testing that causes
   # the following error to be thrown:
