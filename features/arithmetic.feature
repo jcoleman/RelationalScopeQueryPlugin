@@ -19,7 +19,7 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
       | 2    |
-    When I execute the code "NumberDomain.where { (property('x') - 1) eq: 0 as BigInteger }.all()"
+    When I execute the code "NumberDomain.where { (property('x') - 1) eq: 0 }.all()"
     Then I should get the following results:
       | x    |
       | 1    |
@@ -29,7 +29,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
       | 4    |
-    When I execute the code "NumberDomain.where { ((property('x') - 1) - 1) eq: 0 as BigInteger }.all()"
+    When I execute the code "NumberDomain.where { ((property('x') - 1) - 1) eq: 0 }.all()"
     Then I should get the following results:
       | x    |
       | 2    |
@@ -39,7 +39,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
       | 4    |
-    When I execute the code "NumberDomain.where { (property('x') + 1) eq: 3 as BigInteger }.all()"
+    When I execute the code "NumberDomain.where { (property('x') + 1) eq: 3 }.all()"
     Then I should get the following results:
       | x    |
       | 2    |
@@ -49,7 +49,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
       | 4    |
-    When I execute the code "NumberDomain.where { (property('x') * 3) eq: 6 as BigInteger }.all()"
+    When I execute the code "NumberDomain.where { (property('x') * 3) eq: 6 }.all()"
     Then I should get the following results:
       | x    |
       | 2    |
@@ -59,7 +59,7 @@ Feature: Arithmetic queries
       | x    |
       | 2    |
       | 4    |
-    When I execute the code "NumberDomain.where { (property('x') / 2) eq: 1 as BigInteger }.all()"
+    When I execute the code "NumberDomain.where { (property('x') / 2) eq: 1 }.all()"
     Then I should get the following results:
       | x    |
       | 2    |
