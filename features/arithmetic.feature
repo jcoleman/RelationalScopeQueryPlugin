@@ -168,4 +168,49 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
+  Scenario: Addition ne (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | 1    |
+      | 2    |
+      | 3    |
+    When I execute the code "NumberDomain.where { (property('x') + 1) ne: 3 }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 3    |
+  
+  Scenario: Addition ne (expression and value) *with nulls*
+    Given I have created the following "NumberDomain" instances:
+      | x    | y    |
+      | 1    | 1    |
+      | 2    | 2    |
+      | 3    |      |
+    When I execute the code "NumberDomain.where { (property('y') + value(1)) ne: value(3) }.all()"
+    # 2 + 1 == 3, so result x=2 shouldn't be included
+    # in db, null + 1 == null, but in our logic, null != 3 so result x=3 should be included
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 3    |
+  
+  Scenario: Addition is null (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y    |
+      | 1    | 1    |
+      | 2    |      |
+    When I execute the code "NumberDomain.where { (property('y') + value(1)) is: null }.all()"
+    Then I should get the following results:
+      | x    |
+      | 2    |
+  
+  Scenario: Addition is not null (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y    |
+      | 1    | 1    |
+      | 2    |      |
+    When I execute the code "NumberDomain.where { (property('y') + value(1)) is: notNull }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
   
