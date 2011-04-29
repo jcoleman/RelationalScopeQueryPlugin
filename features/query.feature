@@ -30,7 +30,7 @@ Feature: Basic queries
       | Gregory |
       | Harold  |
       | Alice   |
-      
+  
   Scenario: Conveniently query by domain identifier by accessing the domain like a list
     Given I have created the following "Person" instances:
       | name    |
@@ -39,7 +39,7 @@ Feature: Basic queries
     Then I should get the following results:
       | name    |
       | Gregory |
-    
+  
   Scenario: Query by a single property
     Given I have created the following "Person" instances:
       | name    |
@@ -53,6 +53,21 @@ Feature: Basic queries
     Then I should get the following results:
       | name    |
       | Gregory |
+  
+  Scenario: Query by a single property
+    Given I have created the following "Person" instances:
+      | name    |
+      | Gregory |
+      | Harold  |
+      | Alice   |
+    When I execute the following code:
+      """
+      Person.where { name in: ["Gregory", "Harold"] }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Gregory |
+      | Harold  |
   
   Scenario: Limit queries with a take() chain method
     Given I have created the following "Person" instances:
