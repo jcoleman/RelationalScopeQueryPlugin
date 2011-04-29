@@ -49,6 +49,19 @@ class RelationalScopeBuilder {
          || expression instanceof RelationalScope
          || expression instanceof Closure ) {
       expression
+    } else if (expression instanceof List) {
+      def len = expression.size()
+      def list = new ArrayList(len)
+      def containsExpressions = false
+      
+      for (int i = 0; i < len; ++i) {
+        def val = _valueFor_(expression[i])
+        list[i] = val
+        
+        if (val instanceof ExpressionBase) { containsExpressions = true }
+      }
+      
+      new ListExpression(list, !containsExpressions, this)
     } else {
       value(expression)
     }

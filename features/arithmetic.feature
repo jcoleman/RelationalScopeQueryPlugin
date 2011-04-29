@@ -214,3 +214,27 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
+  Scenario: In (property, expression list)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y   |
+      | 1    | 0   |
+      | 2    | 0   |
+      | 3    | 0   |
+    When I execute the code "NumberDomain.where { x in: [property('y') + 1, property('y') + 3] }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 3    |
+  
+  Scenario: In (expression, literal list)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y   |
+      | 1    | 3   |
+      | 2    | 2   |
+      | 3    | 1   |
+    When I execute the code "NumberDomain.where { (property('x') + 1) in: [2, 3] }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 2    |
+  

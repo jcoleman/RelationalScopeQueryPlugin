@@ -11,10 +11,12 @@ import org.hibernate.engine.TypedValue;
 import org.hibernate.util.StringHelper;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.List;
 import java.io.StringWriter;
 import com.radiadesign.relationalscope.expression.ExpressionBase;
 import com.radiadesign.relationalscope.expression.ArithmeticExpression;
 import com.radiadesign.relationalscope.expression.ValueExpression;
+import com.radiadesign.relationalscope.expression.ListExpression;
 import com.radiadesign.relationalscope.expression.AbstractPropertyExpression;
 
 
@@ -72,6 +74,14 @@ public class ArbitraryExpressionCriterion implements Criterion {
       sqlWriter.append( getSingleColumnForPropertyName( ((AbstractPropertyExpression)expr).propertyFor(options).toString(),
                                                         criteria,
                                                         criteriaQuery ) );
+    } else if (expr instanceof ListExpression) {
+      sqlWriter.append('(');
+      List list = (List)((ListExpression)expr).getValue();
+      for (int i = 0, len = list.size(); i < len; ++i) {
+        if (i > 0) { sqlWriter.append(", "); }
+        appendSqlStringForExpression((ExpressionBase)(list.get(i)), sqlWriter, criteria, criteriaQuery);
+      }
+      sqlWriter.append(')');
     } else if (expr instanceof ValueExpression) {
       sqlWriter.append(" ? ");
     }
@@ -104,6 +114,10 @@ public class ArbitraryExpressionCriterion implements Criterion {
     if (expr instanceof ArithmeticExpression) {
       addTypedValuesForExpression(((ArithmeticExpression)expr).getLhs(), types, values);
       addTypedValuesForExpression(((ArithmeticExpression)expr).getRhs(), types, values);
+    } else if (expr instanceof ListExpression) {
+      for (Object item : (List)((ListExpression)expr).getValue()) {
+        addTypedValuesForExpression((ExpressionBase)item, types, values);
+      }
     } else if (expr instanceof ValueExpression) {
       Object value = ((ValueExpression)expr).getValue();
       values.add(value);

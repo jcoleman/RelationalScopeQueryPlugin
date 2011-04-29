@@ -144,6 +144,10 @@ class ScopeComparisonBase {
     this.criterionForExpressionAndExpression(expr, val, options)
   }
   
+  Criterion _dispatchToCriterion_(ValueExpression val1, ValueExpression val2, options) {
+    this.criterionForExpressionAndExpression(val1, val2, options)
+  }
+  
   Criterion _dispatchToCriterion_(ValueExpression val, ArithmeticExpression expr, options) {
     this.criterionForExpressionAndExpression(val, expr, options)
   }
@@ -154,6 +158,14 @@ class ScopeComparisonBase {
   
   Criterion _dispatchToCriterion_(AbstractPropertyExpression prop, ArithmeticExpression expr, options) {
     this.criterionForExpressionAndExpression(prop, expr, options)
+  }
+  
+  Criterion _dispatchToCriterion_(AbstractPropertyExpression prop, ListExpression list, options) {
+    if (list.containsOnlyPrimitives) {
+      this.criterionForPropertyAndValue(prop.propertyFor(options), list.value*.value, options)
+    } else {
+      this.criterionForExpressionAndExpression(prop, list, options)
+    }
   }
   
   
