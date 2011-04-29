@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope.comparison
 
 import com.radiadesign.relationalscope.RelationalScope
+import com.radiadesign.relationalscope.expression.ListExpression
 
 class ScopeComparisonFactory {
   
@@ -63,6 +64,11 @@ class ScopeComparisonFactory {
   }
 
   static between(lhs, rhs) {
+    if ( (rhs instanceof List && rhs.size() != 2)
+         || (rhs instanceof ListExpression && rhs.value.size() != 2) ) {
+      throw new RuntimeException("The 'between' comparator accepts a list of exactly 2 values or expressions; instead got '${rhs}'.")
+    }
+    
     new BetweenScopeComparison(lhs, rhs)
   }
 

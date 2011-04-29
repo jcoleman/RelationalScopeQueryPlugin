@@ -238,3 +238,28 @@ Feature: Arithmetic queries
       | 1    |
       | 2    |
   
+  Scenario: Between (property, expression, and expression)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y   |
+      | 1    | 0   |
+      | 2    | 0   |
+      | 3    | 0   |
+    When I execute the code "NumberDomain.where { x between: [property('x') - 1, property('y') + 2] }.all()"
+    # result x=1 is obvious
+    # result x=2 because 'BETWEEN' is inclusive
+    Then I should get the following results:
+      | x    |
+      | 1    |
+      | 2    |
+  
+  Scenario: Between (expression, property, and property)
+    Given I have created the following "NumberDomain" instances:
+      | x    | y   |
+      | 1    | 3   |
+      | 2    | 2   |
+      | 3    | 1   |
+    When I execute the code "NumberDomain.where { (property('x') + 1) between: [property('x'), property('y')] }.all()"
+    Then I should get the following results:
+      | x    |
+      | 1    |
+  

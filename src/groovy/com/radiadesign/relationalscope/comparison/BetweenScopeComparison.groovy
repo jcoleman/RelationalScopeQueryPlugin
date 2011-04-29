@@ -2,6 +2,7 @@ package com.radiadesign.relationalscope.comparison
 
 import org.hibernate.criterion.*
 import com.radiadesign.relationalscope.expression.*
+import com.radiadesign.hibernate.criterion.ArbitraryExpressionCriterion
 
 class BetweenScopeComparison extends ScopeComparisonBase {
   
@@ -9,12 +10,12 @@ class BetweenScopeComparison extends ScopeComparisonBase {
     super(_lhsValue, _rhsValue)
   }
   
-  Criterion criterionForPropertyAndValue(property, value, options) {
-    if (value.size() != 2) {
-      throw new RuntimeException("Between accepts a list of exactly 2 values.")
-    }
-    
-    Restrictions.between(property, value[0], value[1])
+  Criterion criterionForPropertyAndValue(property, list, options) {
+    Restrictions.between(property, list[0], list[1])
+  }
+  
+  Criterion  criterionForExpressionAndExpression(lhs, list, options) {
+    new ArbitraryExpressionCriterion(lhs, list, 'BETWEEN', options, true)
   }
   
   String toString() {

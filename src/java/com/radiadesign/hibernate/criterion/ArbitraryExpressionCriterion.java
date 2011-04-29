@@ -26,13 +26,19 @@ public class ArbitraryExpressionCriterion implements Criterion {
   private final ExpressionBase rhs;
   private final String operator;
   private final Map options;
+  private final boolean treatRhsAsBinaryTuple;
   
   
-  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map _options) {
+  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map _options, boolean _treatRhsAsBinaryTuple) {
     lhs = _lhs;
     rhs = _rhs;
     operator = _operator;
     options = _options;
+    treatRhsAsBinaryTuple = _treatRhsAsBinaryTuple;
+  }
+  
+  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map _options) {
+    this(_lhs, _rhs, _operator, _options, false);
   }
   
   public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery)
@@ -75,13 +81,19 @@ public class ArbitraryExpressionCriterion implements Criterion {
                                                         criteria,
                                                         criteriaQuery ) );
     } else if (expr instanceof ListExpression) {
-      sqlWriter.append('(');
       List list = (List)((ListExpression)expr).getValue();
-      for (int i = 0, len = list.size(); i < len; ++i) {
-        if (i > 0) { sqlWriter.append(", "); }
-        appendSqlStringForExpression((ExpressionBase)(list.get(i)), sqlWriter, criteria, criteriaQuery);
+      if (treatRhsAsBinaryTuple) {
+        appendSqlStringForExpression((ExpressionBase)(list.get(0)), sqlWriter, criteria, criteriaQuery);
+        sqlWriter.append(" AND ");
+        appendSqlStringForExpression((ExpressionBase)(list.get(1)), sqlWriter, criteria, criteriaQuery);
+      } else {
+        sqlWriter.append('(');
+        for (int i = 0, len = list.size(); i < len; ++i) {
+          if (i > 0) { sqlWriter.append(", "); }
+          appendSqlStringForExpression((ExpressionBase)(list.get(i)), sqlWriter, criteria, criteriaQuery);
+        }
+        sqlWriter.append(')');
       }
-      sqlWriter.append(')');
     } else if (expr instanceof ValueExpression) {
       sqlWriter.append(" ? ");
     }
