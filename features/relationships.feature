@@ -68,7 +68,7 @@ Feature: Relationship queries
       | Nancy   |
       | Harold  |
   
-  Scenario: Query using a map
+  Scenario: Query using a mapped property
     Given I have the following domain class:
       """
       class FriendlyPerson {
