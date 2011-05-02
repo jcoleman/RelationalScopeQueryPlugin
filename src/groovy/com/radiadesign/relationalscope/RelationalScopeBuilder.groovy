@@ -7,7 +7,7 @@ class RelationalScopeBuilder {
   
   RelationalScope _scope_
   
-  def _scopeStack_
+  Stack _scopeStack_
   
   RelationalScopeBuilder(RelationalScope scope) {
     _scope_ = scope
