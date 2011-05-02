@@ -129,6 +129,68 @@ Feature: Relationship queries
       | Nancy   |
       | Jeff    |
   
+  Scenario: Query using a ancestor property
+    Given I have created the following "FriendlyPerson" graph:
+      """
+        [
+          {
+            "name": "Harold",
+            "gender": "male",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Maude"
+            }
+          },
+          {
+            "name": "Maude",
+            "gender": "female"
+          },
+          {
+            "name": "Jeff",
+            "gender": "male",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Harold"
+            }
+          },
+          {
+            "name": "Nancy",
+            "gender": "female",
+            "bestFriend": {
+              "class": "FriendlyPerson",
+              "name": "Maude"
+            }
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        // We're going to access the 'gender' property later on...but without a mapping.
+        bestFriend where: {
+          gender equals: property('../gender')
+        }
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Nancy   |
+      | Jeff    |
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        bestFriend where: {
+          // Test a round-about way of getting to a local property...
+          gender equals: property('../bestFriend.gender')
+        }
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Nancy   |
+      | Jeff    |
+      | Harold  |
+  
   Scenario: Query for children
     Given I have created the following "MarriedPerson" graph:
       """

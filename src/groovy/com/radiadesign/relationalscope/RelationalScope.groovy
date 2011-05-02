@@ -224,8 +224,10 @@ class RelationalScope {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass, "root")
     prepareCriteria( criteria, [ criteria: criteria,
+                                 rootDomainClass: grailsDomainClass,
                                  currentRootAlias: "root",
                                  associationPath: associationName,
+                                 associationDescriptorStack: new Stack(),
                                  associationAliases: [:],
                                  propertyMappings: [:],
                                  getDetachedCriteriaCount: { -> return detachedCriteriaCount },
@@ -346,10 +348,25 @@ class RelationalScope {
       aliasMap[associationPath] = alias
     }
   }
-
-  static propertyFor(options, propertyKey) {
+  
+  static retrieveAndValidateSelectableProperty(domainClass, associationName) {
+    def domainProperty = domainClass.getPropertyByName(associationName)
+    if (!domainProperty.isAssociation()) {
+      throw new RuntimeException("Domain class '${domainClass.name}' property '${associationName}' is not an association, but you attempted to walk over it when choosing a property.")
+    }
+    if (domainProperty.isOneToMany()) {
+      throw new RuntimeException("You attempted to use the one-to-many association ${associationName} when choosing a selectable property. This is not allowed.")
+    }
+    return domainProperty
+  }
+  
+  static propertyFor(options, propertyKey, associationDescriptor=null) {
     def alias
     def associationPath
+    
+    if (associationDescriptor == null && !options.associationDescriptorStack.empty()) {
+      associationDescriptor = options.associationDescriptorStack.peek()
+    }
     
     // Determine if an association...
     def lastDotIndex = propertyKey.lastIndexOf('.')
@@ -365,10 +382,25 @@ class RelationalScope {
     if (associationPath) {
       def associations = associationPath.tokenize('.')
       def path = associations[0]
+      
+      def domainClass
+      if (associationDescriptor?.associationDomainProperty) {
+        domainClass = associationDescriptor.associationDomainProperty.referencedDomainClass
+      } else {
+        domainClass = options.rootDomainClass
+      }
+      
+      def currentAssociationProperty = RelationalScope.retrieveAndValidateSelectableProperty(domainClass, path)
+      
       RelationalScope.createAssociationAliasIfNecessary(options, path)
       
       if (associations.size() > 1) {
         associations[1..-1].each { association ->
+          currentAssociationProperty = RelationalScope.retrieveAndValidateSelectableProperty(
+                                         currentAssociationProperty.referencedDomainClass,
+                                         path
+                                       )
+          
           path += ".${association}"
           RelationalScope.createAssociationAliasIfNecessary(options, path)
         }
@@ -385,28 +417,48 @@ class RelationalScope {
 
   Criterion toCriterion(options) {
     def currentAssociationPath = fullAssociationPath(options.associationPath)
+    def associationDescriptorStack = options.associationDescriptorStack
     
-    // Do we need to create new alias?
+    def addedPathToStack = ( associationDescriptorStack.empty()
+                             || currentAssociationPath != associationDescriptorStack.peek().path )
+    if (addedPathToStack) {
+      // Track our association path and the associated grails domain property.
+      def associationDomainProperty
+      if (associationName) {
+        associationDomainProperty = grailsDomainClass.getPropertyByName(associationName)
+      }
+      associationDescriptorStack.push( [ path: currentAssociationPath,
+                                         associationDomainProperty: associationDomainProperty ] )
+    }
+    
+    // Are we digging into an associaton?
     if (associationName) {
+      // If so, do we need to create new alias?
       RelationalScope.createAssociationAliasIfNecessary(options, currentAssociationPath)
     }
     
+    Criterion criterion
     def newOptions = options + [associationPath: currentAssociationPath]
     if (scopes.size() == 1) {
       // If there is only one scope contained in this object then
       // just delegate to that scope.
-      return scopes.first().toCriterion(newOptions)
+      criterion = scopes.first().toCriterion(newOptions)
     } else if (scopes.size() > 1) {
       // The default combination strategy of multiple scopes is AND.
-      scopes.inject(this.junction()) { criterion, scope ->
+      criterion = scopes.inject(this.junction()) { criterionAccumulator, scope ->
         def additionalCriterion = scope.toCriterion(newOptions)
-        if (additionalCriterion) { criterion.add(additionalCriterion) }
-        return criterion
+        if (additionalCriterion) { criterionAccumulator.add(additionalCriterion) }
+        return criterionAccumulator
       }
     } else {
       // There is no criteria to create.
-      return null
+      criterion = null
     }
+    
+    if (addedPathToStack) {
+      associationDescriptorStack.pop()
+    }
+    return criterion
   }
   
   Projection toProjection(options) {

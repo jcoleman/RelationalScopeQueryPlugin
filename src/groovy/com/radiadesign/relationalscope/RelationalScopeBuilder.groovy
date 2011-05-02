@@ -91,8 +91,12 @@ class RelationalScopeBuilder {
     new MappedPropertyExpression(key, this)
   }
   
-  def property(key) {
-    new LocalPropertyExpression(key, this)
+  def property(key, options=null) {
+    if (key.startsWith('../')) {
+      new AncestorWalkingPropertyExpression(key, !!options?.correlation, this)
+    } else {
+      new LocalPropertyExpression(key, this)
+    }
   }
   
   def value(val) {
