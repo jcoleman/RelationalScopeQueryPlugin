@@ -137,7 +137,7 @@ class RelationalScopeBuilder {
     def currentDomainClass = activeRelationalScope.grailsDomainClass
     def domainProperty = currentDomainClass.getPropertyByName(associationName)
     if (!domainProperty.isAssociation()) {
-      throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${associationName}' is not an association and cannot be used with the 'where' comparator in a relational query?" as String)
+      throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${associationName}' is not an association and cannot be used with the 'where' comparator in a relational query." as String)
     }
     
     def referencedDomainClass = domainProperty.referencedDomainClass
@@ -147,10 +147,6 @@ class RelationalScopeBuilder {
       if (domainProperty.referencedPropertyName == null) {
         throw new RuntimeException("Domain class '${currentDomainClass.name}' property '${associationName}' is type hasMany, yet the referenced domain class '${referencedDomainClass.name}' does not have a corresponding relationship." as String)
       } else {
-        // Give the relation knowledge of what it would look like if this were a typical join.
-        relation.virtualGrailsDomainClass = currentDomainClass
-        relation.virtualAssociationName = associationName
-        
         // We don't want to do a join here, because then the restrictions based on the association's values
         // will actually restrict the values that appear in the association collection. Instead, a reasonable
         // assumption is that the user intends to think of this as "where any of the association have the
@@ -158,6 +154,9 @@ class RelationalScopeBuilder {
         def scope = _projectionToScope_(relation, args).select {
           "${domainProperty.referencedPropertyName}"()
         }
+        
+        // Give the scope knowledge of what it would look like if this were a typical join.
+        scope.virtualAssociationName = associationName
         _addScopeOrComparisonToCurrentScope_( ScopeComparisonFactory.in(property(associationName), scope) )
       }
     } else {

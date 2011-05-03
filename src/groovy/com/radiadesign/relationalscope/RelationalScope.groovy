@@ -15,9 +15,6 @@ class RelationalScope {
   // This property being set indicates that we're walking an association
   // in a non-traditional has-many subquery way.
   String virtualAssociationName
-  // This property is what the grails domain class would have been if
-  // we were using a standard join.
-  DefaultGrailsDomainClass virtualGrailsDomainClass
   
   def scopes = []
   def selections = []
@@ -58,14 +55,12 @@ class RelationalScope {
     skipCount = scope.skipCount
     orderBy = scope.orderBy.clone()
     
-    // The following isn't strictly necessary because scopes generally
-    // only get cloned at the parent level, i.e. where no association exists.
+    // The following isn't necessary because scopes only get cloned at the parent level,
+    // i.e. where no association exists. (Technically they do get cloned when entering
+    // a has-many sub-query...but we manually set what we want of these properties
+    // in that code.)
     // - associationName = scope.associationName
-    // That being said, we do clone internally on has-many association walkings
-    // since we execute a select() call on the generated subquery scope.
-    // So the following are necessary.
-    virtualAssociationName = scope.virtualAssociationName
-    virtualGrailsDomainClass = scope.virtualGrailsDomainClass
+    // - virtualAssociationName = scope.virtualAssociationName
   }
   
   
@@ -432,6 +427,8 @@ class RelationalScope {
     }
     return "${alias ?: options.currentRootAlias}.${propertyKey}"
   }
+  
+  DefaultGrailsDomainClass getParentDomainClass
 
   Criterion toCriterion(options) {
     def currentAssociationPath = fullAssociationPath(options.associationPath)
@@ -441,11 +438,17 @@ class RelationalScope {
     def addedPathToStack = ( associationDescriptorStack.empty() || association )
     if (addedPathToStack) {
       // Track our association path and the associated grails domain property.
+      def parentDomainClass = grailsDomainClass
       def associationDomainProperty
       if (association) {
-        associationDomainProperty = (virtualGrailsDomainClass ?: grailsDomainClass).getPropertyByName(association)
+        if (!associationDescriptorStack.empty()) {
+          parentDomainClass = associationDescriptorStack.peek().parentDomainClass
+        }
+        associationDomainProperty = parentDomainClass.getPropertyByName(association)
+        parentDomainClass = associationDomainProperty.referencedDomainClass
       }
       associationDescriptorStack.push( [ path: currentAssociationPath,
+                                         parentDomainClass: parentDomainClass,
                                          associationDomainProperty: associationDomainProperty ] )
     }
     
