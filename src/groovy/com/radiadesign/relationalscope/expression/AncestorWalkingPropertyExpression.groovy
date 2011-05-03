@@ -18,21 +18,17 @@ class AncestorWalkingPropertyExpression extends AbstractPropertyExpression {
     def actualPropertyKey = propertyKey
     def curIndex = associationDescriptorStack.size() - 1
     def associationDescriptor = associationDescriptorStack.empty() ? null : associationDescriptorStack.peek()
+    
     def associationPath = associationDescriptor.path
-    def encounteredHasManyProperty = false
     while (actualPropertyKey.startsWith('../')) {
       def associationDomainProperty = associationDescriptor.associationDomainProperty
       
-      // Check to see if this was set the last time around in the loop.
-      if (encounteredHasManyProperty && !allowCorrelation) {
-        // If it was encountered the last time, then we have walked above the
+      if ( associationDomainProperty?.isOneToMany()
+           && !allowCorrelation ) {
+        // If we have a has-many property here, then we are going to walk above the
         // "parent collection." This means we now now causing correlated queries.
         // -- Require the user to have explicitly confirmed that this is intentional.
         throw new RuntimeException("Use of the '../' operator in property '${propertyKey}' attempted to walk beyond the has-many collection '${associationDomainProperty.name}'. This will cause correlated sub-queries to be generated. If this is intentional, please pass 'correlation: true' as part of the param <options> map to the 'property()' call.")
-      }
-      
-      if (associationDomainProperty&& associationDomainProperty.isOneToMany() ) {
-        ecnounteredHasManyProperty = true
       }
       
       --curIndex
