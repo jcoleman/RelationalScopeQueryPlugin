@@ -276,7 +276,7 @@ class RelationalScope {
   }
   
   def mapifyResultIfNecessary(result) {
-    if (selectionKeys.isEmpty()) {
+    if (selectionKeys.isEmpty() || result == null) {
       return result
     } else {
       if (selectionKeys.size() > 1) {

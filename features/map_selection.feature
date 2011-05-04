@@ -176,6 +176,23 @@ Feature: Queries selecting specific properties and turning the results into a li
       | Jeff   |
       | Nancy  |
   
+  Scenario: Null result for .find() should not return empty map
+    Given I have created the following "FriendlyPerson" graph:
+      """
+        [
+        ]
+      """
+    When I execute the following code:
+      """
+      FriendlyPerson.where {
+        // No restrictions for this test
+      }.select(
+        "person.name":"name",
+        "person.gender": "gender"
+      ).find()
+      """
+    Then I should get 'null'
+  
   Scenario: Query with grouping mapped selection of aggregrate values
     Given I have the following domain class:
       """
@@ -207,3 +224,4 @@ Feature: Queries selecting specific properties and turning the results into a li
       | x    | y_average |
       | 1    | 3         |
       | 2    | 6         |
+    

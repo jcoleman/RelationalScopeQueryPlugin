@@ -97,6 +97,10 @@ When /^I execute the following code:$/ do |code|
   @result = @grails.execute code
 end
 
+Then /^I should get 'null'$/ do
+  @result.should equal(nil)
+end
+
 Then /^I should get the following results(, in order)?:$/ do |order, instances|
   # We only care about certain columns
   columns = instances.raw.first.inspect
