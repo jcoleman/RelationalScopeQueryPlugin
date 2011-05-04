@@ -397,8 +397,8 @@ class RelationalScope {
       def path = associations[0]
       
       def domainClass
-      if (associationDescriptor?.associationDomainProperty) {
-        domainClass = associationDescriptor.associationDomainProperty.referencedDomainClass
+      if (associationDescriptor?.parentDomainClass) {
+        domainClass = associationDescriptor.parentDomainClass
       } else {
         domainClass = options.rootDomainClass
       }
@@ -411,7 +411,7 @@ class RelationalScope {
         associations[1..-1].each { association ->
           currentAssociationProperty = RelationalScope.retrieveAndValidateSelectableProperty(
                                          currentAssociationProperty.referencedDomainClass,
-                                         path
+                                         association
                                        )
           
           path += ".${association}"
