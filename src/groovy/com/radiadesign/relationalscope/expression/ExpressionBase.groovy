@@ -54,4 +54,8 @@ class ExpressionBase {
     div(expr)
   }
   
+  ExpressionBase negative() {
+    return new ArithmeticExpression(null, this, '-', builder)
+  }
+  
 }

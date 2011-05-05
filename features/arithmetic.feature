@@ -263,3 +263,14 @@ Feature: Arithmetic queries
       | x    |
       | 1    |
   
+  Scenario: Negation (expression and value)
+    Given I have created the following "NumberDomain" instances:
+      | x    |
+      | -1   |
+      | 0    |
+      | 1    |
+    When I execute the code "NumberDomain.where { (- property('x')) gte: 0 }.all()"
+    Then I should get the following results:
+      | x    |
+      | -1   |
+      | 0    |

@@ -45,10 +45,12 @@ public class ArbitraryExpressionCriterion implements Criterion {
   throws HibernateException {
     StringWriter sqlWriter = new StringWriter();
     sqlWriter.append('(');
-    if (rhs == null) { sqlWriter.append('('); }
-    appendSqlStringForExpression(lhs, sqlWriter, criteria, criteriaQuery);
-    if (rhs == null) { sqlWriter.append(')'); }
-    sqlWriter.append(' ');
+    if (lhs != null) {
+      if (rhs == null) { sqlWriter.append('('); }
+      appendSqlStringForExpression(lhs, sqlWriter, criteria, criteriaQuery);
+      if (rhs == null) { sqlWriter.append(')'); }
+      sqlWriter.append(' ');
+    }
     sqlWriter.append(operator);
     if (rhs != null) {
       sqlWriter.append(' ');
