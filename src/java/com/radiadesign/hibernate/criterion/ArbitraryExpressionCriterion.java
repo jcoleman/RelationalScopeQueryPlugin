@@ -10,6 +10,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.TypedValue;
 import org.hibernate.util.StringHelper;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.StringWriter;
@@ -25,20 +26,45 @@ public class ArbitraryExpressionCriterion implements Criterion {
   private final ExpressionBase lhs;
   private final ExpressionBase rhs;
   private final String operator;
-  private final Map options;
   private final boolean treatRhsAsBinaryTuple;
+  private HashMap<ExpressionBase, String> propertyExpressionCriterionKeys;
   
   
-  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map _options, boolean _treatRhsAsBinaryTuple) {
+  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map options, boolean _treatRhsAsBinaryTuple) {
     lhs = _lhs;
     rhs = _rhs;
     operator = _operator;
-    options = _options;
     treatRhsAsBinaryTuple = _treatRhsAsBinaryTuple;
+    
+    this.initializePropertyExpressionKeys(options);
   }
   
-  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map _options) {
-    this(_lhs, _rhs, _operator, _options, false);
+  protected ArbitraryExpressionCriterion(ExpressionBase _lhs, ExpressionBase _rhs, String _operator, Map options) {
+    this(_lhs, _rhs, _operator, options, false);
+  }
+  
+  protected void initializePropertyExpressionKeys(Map options) {
+    propertyExpressionCriterionKeys = new HashMap<ExpressionBase, String>();
+    if (lhs != null) { addPropertyExpressionKeysFor(lhs, options); }
+    if (rhs != null) { addPropertyExpressionKeysFor(rhs, options); }
+  }
+  
+  private void addPropertyExpressionKeysFor(ExpressionBase expr, Map options) {
+    if (expr instanceof ArithmeticExpression) {
+      addPropertyExpressionKeysFor(((ArithmeticExpression)expr).getLhs(), options);
+      addPropertyExpressionKeysFor(((ArithmeticExpression)expr).getRhs(), options);
+    } else if (expr instanceof ListExpression) {
+      for (Object item : (List)((ListExpression)expr).getValue()) {
+        addPropertyExpressionKeysFor((ExpressionBase)item, options);
+      }
+    } else if (expr instanceof ValueExpression) {
+      // Do nothing, no properties exist here.
+    } else if (expr instanceof AbstractPropertyExpression) {
+      propertyExpressionCriterionKeys.put(
+        expr,
+        ((AbstractPropertyExpression)expr).propertyFor(options).toString()
+      );
+    }
   }
   
   public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery)
@@ -79,7 +105,7 @@ public class ArbitraryExpressionCriterion implements Criterion {
       appendSqlStringForExpression(nextrhs, sqlWriter, criteria, criteriaQuery);
       if (parenthesizeRight) { sqlWriter.append(')'); }
     } else if (expr instanceof AbstractPropertyExpression) {
-      sqlWriter.append( getSingleColumnForPropertyName( ((AbstractPropertyExpression)expr).propertyFor(options).toString(),
+      sqlWriter.append( getSingleColumnForPropertyName( propertyExpressionCriterionKeys.get(expr),
                                                         criteria,
                                                         criteriaQuery ) );
     } else if (expr instanceof ListExpression) {
