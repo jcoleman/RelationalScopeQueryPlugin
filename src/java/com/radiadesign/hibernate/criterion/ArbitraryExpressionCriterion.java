@@ -139,9 +139,11 @@ public class ArbitraryExpressionCriterion implements Criterion {
   throws HibernateException {
     ArrayList<Type> types = new ArrayList<Type>();
     ArrayList<Object> values = new ArrayList<Object>();
-    addTypedValuesForExpression(lhs, types, values);
+    if (lhs != null) {
+      addTypedValuesForExpression(lhs, types, values, criteria, criteriaQuery);
+    }
     if (rhs != null) {
-      addTypedValuesForExpression(rhs, types, values);
+      addTypedValuesForExpression(rhs, types, values, criteria, criteriaQuery);
     }
     TypedValue[] typedValues = new TypedValue[values.size()];
     for (int i = 0, len = values.size(); i < len; ++i) {
@@ -150,19 +152,32 @@ public class ArbitraryExpressionCriterion implements Criterion {
     return typedValues;
   }
   
-  public void addTypedValuesForExpression(ExpressionBase expr, ArrayList types, ArrayList values) {
+  public void addTypedValuesForExpression(ExpressionBase expr, ArrayList types, ArrayList values, Criteria criteria, CriteriaQuery criteriaQuery) {
     if (expr instanceof ArithmeticExpression) {
-      addTypedValuesForExpression(((ArithmeticExpression)expr).getLhs(), types, values);
-      addTypedValuesForExpression(((ArithmeticExpression)expr).getRhs(), types, values);
+      addTypedValuesForExpression(((ArithmeticExpression)expr).getLhs(), types, values, criteria, criteriaQuery);
+      addTypedValuesForExpression(((ArithmeticExpression)expr).getRhs(), types, values, criteria, criteriaQuery);
     } else if (expr instanceof ListExpression) {
       for (Object item : (List)((ListExpression)expr).getValue()) {
-        addTypedValuesForExpression((ExpressionBase)item, types, values);
+        addTypedValuesForExpression((ExpressionBase)item, types, values, criteria, criteriaQuery);
       }
     } else if (expr instanceof ValueExpression) {
       Object value = ((ValueExpression)expr).getValue();
       values.add(value);
       if (value != null) {
-        types.add(TypeFactory.heuristicType(value.getClass().getName()));
+        Type type = TypeFactory.heuristicType(value.getClass().getName());
+        if (type == null) {
+          ExpressionBase propExpr = null;
+          if (lhs instanceof AbstractPropertyExpression) {
+            propExpr = (AbstractPropertyExpression)lhs;
+          } else if (rhs instanceof AbstractPropertyExpression) {
+            propExpr = (AbstractPropertyExpression)rhs;
+          }
+          if (propExpr != null) {
+            type = criteriaQuery.getTypeUsingProjection(criteria, propertyExpressionCriterionKeys.get(propExpr));
+          }
+        }
+        
+        types.add(type);
       } else {
         types.add(null);
       }

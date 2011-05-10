@@ -68,6 +68,36 @@ Feature: Relationship queries
       | Nancy   |
       | Harold  |
   
+  Scenario: Query for children
+    Given I have created the following "MarriedPerson" graph:
+      """
+        [
+          {
+            "name": "Harold",
+            "gender": "male",
+            "age": 18,
+            "spouse": {
+              "class": "MarriedPerson",
+              "name": "Maude"
+            }
+          },
+          {
+            "name": "Maude",
+            "gender": "female",
+            "age": 57
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      MarriedPerson.where {
+        spouse in: [MarriedPerson.findByName('Maude')]
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Harold  |
+  
   Scenario: Query using a mapped property
     Given I have the following domain class:
       """
