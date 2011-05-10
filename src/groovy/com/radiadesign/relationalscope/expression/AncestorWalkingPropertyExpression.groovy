@@ -19,7 +19,7 @@ class AncestorWalkingPropertyExpression extends AbstractPropertyExpression {
     def curIndex = associationDescriptorStack.size() - 1
     def associationDescriptor = associationDescriptorStack.empty() ? null : associationDescriptorStack.peek()
     
-    def associationPath = associationDescriptor.path
+    def associationPath = associationDescriptor?.path
     while (actualPropertyKey.startsWith('../')) {
       def associationDomainProperty = associationDescriptor.associationDomainProperty
       
