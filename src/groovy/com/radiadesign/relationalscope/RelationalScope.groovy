@@ -345,19 +345,26 @@ class RelationalScope {
     }
   }
   
-  static aliasDiscriminatorFor(options) {
-    options.isDetachedCriteria ? "sqjn_${options.getDetachedCriteriaCount()}" : 'rtjn'
+  static aliasDiscriminatorFor(options, associationDescriptor=null) {
+    if (associationDescriptor != null) {
+      associationDescriptor.isDetachedCriteria ? "sqjn_${associationDescriptor.detachedCriteriaCount}" : 'rtjn'
+    } else {
+      options.isDetachedCriteria ? "sqjn_${options.getDetachedCriteriaCount()}" : 'rtjn'
+    }
   }
   
-  static createAssociationAliasIfNecessary(options, associationPath) {
-    def discriminator = RelationalScope.aliasDiscriminatorFor(options)
+  static createAssociationAliasIfNecessary(options, associationPath, associationDescriptor=null) {
+    def discriminator = RelationalScope.aliasDiscriminatorFor(options, associationDescriptor)
     def aliasMap = options.associationAliases[discriminator]
     if (!aliasMap) {
       aliasMap = options.associationAliases[discriminator] = [:]
     }
     if (!aliasMap[associationPath]) {
       def alias = "${discriminator}_${associationPath.replace('.', '_')}"
-      options.criteria.createAlias(associationPath, alias, CriteriaSpecification.LEFT_JOIN)
+      (associationDescriptor ?: options).criteria
+                                        .createAlias( associationPath,
+                                                      alias,
+                                                      CriteriaSpecification.LEFT_JOIN )
       aliasMap[associationPath] = alias
     }
   }
@@ -405,7 +412,7 @@ class RelationalScope {
       
       def currentAssociationProperty = RelationalScope.retrieveAndValidateSelectableProperty(domainClass, path)
       
-      RelationalScope.createAssociationAliasIfNecessary(options, path)
+      RelationalScope.createAssociationAliasIfNecessary(options, path, associationDescriptor)
       
       if (associations.size() > 1) {
         associations[1..-1].each { association ->
@@ -415,21 +422,31 @@ class RelationalScope {
                                        )
           
           path += ".${association}"
-          RelationalScope.createAssociationAliasIfNecessary(options, path)
+          RelationalScope.createAssociationAliasIfNecessary(options, path, associationDescriptor)
         }
       }
       
-      def discriminator = RelationalScope.aliasDiscriminatorFor(options)
+      def discriminator = RelationalScope.aliasDiscriminatorFor(options, associationDescriptor)
       def discriminatedAliases = options.associationAliases[discriminator]
       assert discriminatedAliases : "An association was used for which no alias has been created"
       alias = discriminatedAliases[associationPath]
       assert alias : "An association was used for which no alias has been created"
     }
+    
     return "${alias ?: options.currentRootAlias}.${propertyKey}"
   }
   
-  DefaultGrailsDomainClass getParentDomainClass
-
+  static addAssociationDescriptorToStack(options, path, parentDomainClass, associationDomainProperty) {
+    options.associationDescriptorStack.push(
+      path: path,
+      parentDomainClass: parentDomainClass,
+      associationDomainProperty: associationDomainProperty,
+      isDetachedCriteria: options.isDetachedCriteria,
+      detachedCriteriaCount: options.getDetachedCriteriaCount(),
+      criteria: options.criteria
+    )
+  }
+  
   Criterion toCriterion(options) {
     def currentAssociationPath = fullAssociationPath(options.associationPath)
     def associationDescriptorStack = options.associationDescriptorStack
@@ -447,9 +464,10 @@ class RelationalScope {
         associationDomainProperty = parentDomainClass.getPropertyByName(association)
         parentDomainClass = associationDomainProperty.referencedDomainClass
       }
-      associationDescriptorStack.push( [ path: currentAssociationPath,
-                                         parentDomainClass: parentDomainClass,
-                                         associationDomainProperty: associationDomainProperty ] )
+      RelationalScope.addAssociationDescriptorToStack( options,
+                                                       currentAssociationPath,
+                                                       parentDomainClass,
+                                                       associationDomainProperty )
     }
     
     // Are we digging into an associaton?

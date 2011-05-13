@@ -37,7 +37,12 @@ Feature: Sub-queries
       """
       class Book {
         String title
-        String author
+        String authorName
+        Author author
+        
+        static constraints = {
+          author nullable: true
+        }
       }
       """
     Given I have the following domain class:
@@ -47,13 +52,13 @@ Feature: Sub-queries
       }
       """
     And I have created the following "Book" instances:
-      | title                       | author     |
+      | title                       | authorName |
       | Lord of the Rings           | Tolkien    |
       | 20000 Leagues Under the Sea | Verne      |
     When I execute the following code:
       """
       Book.where {
-        author 'in': Author.where { }.select { property("name") }
+        authorName 'in': Author.where { }.select { property("name") }
       }.all()
       """
     Then I should get the following results:
@@ -65,7 +70,7 @@ Feature: Sub-queries
     When I execute the following code:
       """
       Book.where {
-        author 'in': Author.where {
+        authorName 'in': Author.where {
           name equals: "Tolkien"
         }.select { property("name") }
       }.all()
@@ -73,3 +78,107 @@ Feature: Sub-queries
     Then I should get the following results:
       | title              |
       | Lord of the Rings  |
+  
+  Scenario: Query with property('../propName') walking inside an exists subquery
+    Given I have created the following "Book" instances:
+      | title                       | authorName |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    And I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    When I execute the following code:
+      """
+      Book.where {
+        exists(
+          Author.where {
+            name equals: property('../author.name')
+          }
+        )
+      }.all()
+      """
+    Then I should get the following results:
+      | title              |
+    When I execute the following code:
+      """
+      def book = Book.findByTitle('Lord of the Rings')
+      book.author = Author.findByName('Tolkien')
+      book.save()
+      """
+    And I execute the following code:
+      """
+      Book.where {
+        exists(
+          Author.where {
+            name equals: property('../author.name')
+          }
+        )
+      }.all()
+      """
+    Then I should get the following results:
+      | title              |
+      | Lord of the Rings  |
+    # Manually clean up a bit...so we don't throw integrity constraint
+    # violation exceptions...
+    Then I execute the following code:
+      """
+      def book = Book.findByTitle('Lord of the Rings')
+      book.author = null
+      book.save()
+      """
+  
+  Scenario: Entering an association within an exists subquery (bug had been created by new property walking code)
+    Given I have created the following "Book" instances:
+      | title                       | authorName |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    And I have created the following "Author" instances:
+      | name      |
+      | Tolkien   |
+      | Verne     |
+      | Bernstein |
+    When I execute the following code:
+      """
+      Author.where {
+        name mapTo: 'author_name'
+        exists(
+          Book.where {
+            author where: {
+              name equals: mapping('author_name')
+            }
+          }
+        )
+      }.all()
+      """
+    Then I should get the following results:
+      | name     |
+    When I execute the following code:
+      """
+      def book = Book.findByTitle('Lord of the Rings')
+      book.author = Author.findByName('Tolkien')
+      book.save()
+      """
+    And I execute the following code:
+      """
+      Author.where {
+        name mapTo: 'author_name'
+        exists(
+          Book.where {
+            author where: {
+              name equals: mapping('author_name')
+            }
+          }
+        )
+      }.all()
+      """
+      | Tolkien  |
+    # Manually clean up a bit...so we don't throw integrity constraint
+    # violation exceptions...
+    Then I execute the following code:
+      """
+      def book = Book.findByTitle('Lord of the Rings')
+      book.author = null
+      book.save()
+      """
+  

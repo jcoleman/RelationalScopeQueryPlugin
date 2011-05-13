@@ -18,7 +18,16 @@ class ExistsScopeComparison extends ScopeComparisonBase {
   }
   
   Criterion toCriterion(options) {
-    Subqueries.exists( detachedCriteriaFor(scope, options) )
+    RelationalScope.addAssociationDescriptorToStack( options,
+                                                     null,
+                                                     scope.grailsDomainClass,
+                                                     null )
+    
+    Criterion criterion = Subqueries.exists( detachedCriteriaFor(scope, options) )
+    
+    options.associationDescriptorStack.pop()
+    
+    return criterion
   }
   
   String toString() {
