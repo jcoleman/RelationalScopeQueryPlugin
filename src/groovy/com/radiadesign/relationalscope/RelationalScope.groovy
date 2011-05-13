@@ -362,14 +362,6 @@ class RelationalScope {
     }
     if (!aliasMap[associationPath]) {
       def alias = "${discriminator}_${associationPath.replace('.', '_')}"
-      println "\n\n\ncreating alias: '${alias}' with discriminator '${discriminator}'\n"
-      println "already had aliases:\n${options.associationAliases.inspect()}\n\n"
-      /*try {
-        throw new Exception()
-      } catch (e) {
-        e.printStackTrace()
-      }*/
-      
       optionsOrAssociationDescriptor.criteria
                                     .createAlias( associationPath,
                                                   alias,
