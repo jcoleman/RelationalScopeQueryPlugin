@@ -119,14 +119,6 @@ Feature: Sub-queries
     Then I should get the following results:
       | title              |
       | Lord of the Rings  |
-    # Manually clean up a bit...so we don't throw integrity constraint
-    # violation exceptions...
-    Then I execute the following code:
-      """
-      def book = Book.findByTitle('Lord of the Rings')
-      book.author = null
-      book.save()
-      """
   
   Scenario: Entering an association within an exists subquery (bug had been created by new property walking code)
     Given I have created the following "Book" instances:
@@ -171,14 +163,5 @@ Feature: Sub-queries
           }
         )
       }.all()
-      """
-      | Tolkien  |
-    # Manually clean up a bit...so we don't throw integrity constraint
-    # violation exceptions...
-    Then I execute the following code:
-      """
-      def book = Book.findByTitle('Lord of the Rings')
-      book.author = null
-      book.save()
       """
   

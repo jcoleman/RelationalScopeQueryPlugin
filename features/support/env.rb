@@ -40,11 +40,25 @@ end
 
 After do |scenario| 
   # Purge all the dirty classes
+  grails.execute <<-EOD
+    import groovy.sql.Sql
+    import org.codehaus.groovy.grails.commons.ApplicationHolder
+    def applicationContext = ApplicationHolder.application.mainContext
+    def sql = new Sql(applicationContext.dataSource)
+    sql.execute("SET REFERENTIAL_INTEGRITY FALSE")
+  EOD
   @dirty_classes.each do |klass|
     grails.execute <<-EOD
       #{klass}.list().each { it.delete() }
     EOD
   end
+  grails.execute <<-EOD
+    import groovy.sql.Sql
+    import org.codehaus.groovy.grails.commons.ApplicationHolder
+    def applicationContext = ApplicationHolder.application.mainContext
+    def sql = new Sql(applicationContext.dataSource)
+    sql.execute("SET REFERENTIAL_INTEGRITY TRUE")
+  EOD
 end
 
 at_exit do
