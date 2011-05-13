@@ -355,16 +355,25 @@ class RelationalScope {
   
   static createAssociationAliasIfNecessary(options, associationPath, associationDescriptor=null) {
     def discriminator = RelationalScope.aliasDiscriminatorFor(options, associationDescriptor)
-    def aliasMap = options.associationAliases[discriminator]
+    def optionsOrAssociationDescriptor = (associationDescriptor ?: options)
+    def aliasMap = optionsOrAssociationDescriptor.associationAliases[discriminator]
     if (!aliasMap) {
-      aliasMap = options.associationAliases[discriminator] = [:]
+      aliasMap = optionsOrAssociationDescriptor.associationAliases[discriminator] = [:]
     }
     if (!aliasMap[associationPath]) {
       def alias = "${discriminator}_${associationPath.replace('.', '_')}"
-      (associationDescriptor ?: options).criteria
-                                        .createAlias( associationPath,
-                                                      alias,
-                                                      CriteriaSpecification.LEFT_JOIN )
+      println "\n\n\ncreating alias: '${alias}' with discriminator '${discriminator}'\n"
+      println "already had aliases:\n${options.associationAliases.inspect()}\n\n"
+      /*try {
+        throw new Exception()
+      } catch (e) {
+        e.printStackTrace()
+      }*/
+      
+      optionsOrAssociationDescriptor.criteria
+                                    .createAlias( associationPath,
+                                                  alias,
+                                                  CriteriaSpecification.LEFT_JOIN )
       aliasMap[associationPath] = alias
     }
   }
@@ -427,7 +436,7 @@ class RelationalScope {
       }
       
       def discriminator = RelationalScope.aliasDiscriminatorFor(options, associationDescriptor)
-      def discriminatedAliases = options.associationAliases[discriminator]
+      def discriminatedAliases = (associationDescriptor ?: options).associationAliases[discriminator]
       assert discriminatedAliases : "An association was used for which no alias has been created"
       alias = discriminatedAliases[associationPath]
       assert alias : "An association was used for which no alias has been created"
@@ -443,6 +452,7 @@ class RelationalScope {
       associationDomainProperty: associationDomainProperty,
       isDetachedCriteria: options.isDetachedCriteria,
       detachedCriteriaCount: options.getDetachedCriteriaCount(),
+      associationAliases: options.associationAliases,
       criteria: options.criteria
     )
   }

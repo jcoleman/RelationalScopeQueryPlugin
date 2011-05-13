@@ -165,3 +165,63 @@ Feature: Sub-queries
       }.all()
       """
   
+  Scenario: Using both property('../propName') walking and mapping for the same association property at the same time (bug: query exception due to duplicate alias being created had been created by new property walking code)
+    Given I have created the following "Book" instances:
+      | title                       | authorName |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    And I have created the following "Author" instances:
+      | name      |
+      | Tolkien   |
+      | Verne     |
+      | Bernstein |
+    When I execute the following code:
+      """
+      Book.where {
+        id mapTo: 'book_id'
+        author is: notNull
+        author where: {
+          name mapTo: 'author_name'
+        }
+        exists(
+          Book.where {
+            id equals: mapping('book_id')
+            property('../author.name') ne: 'Bernstein'
+            author where: {
+              name equals: mapping('author_name')
+            }
+          }
+        )
+      }.all()
+      """
+    Then I should get the following results:
+      | name     |
+    When I execute the following code:
+      """
+      def book = Book.findByTitle('Lord of the Rings')
+      book.author = Author.findByName('Tolkien')
+      book.save()
+      """
+    And I execute the following code:
+      """
+      Book.where {
+        id mapTo: 'book_id'
+        author is: notNull
+        author where: {
+          name mapTo: 'author_name'
+        }
+        exists(
+          Book.where {
+            id equals: mapping('book_id')
+            property('../author.name') ne: 'Bernstein'
+            author where: {
+              name equals: mapping('author_name')
+            }
+          }
+        )
+      }.all()
+      """
+    Then I should get the following results:
+      | title             |
+      | Lord of the Rings |
+  
