@@ -381,9 +381,10 @@ class RelationalScope {
     return domainProperty
   }
   
-  static propertyFor(options, propertyKey, associationDescriptor=null) {
+  static propertyFor(options, propertyKey, overrideAssociationDescriptor=null) {
     def alias
     def associationPath
+    def associationDescriptor = overrideAssociationDescriptor
     
     if (associationDescriptor == null && !options.associationDescriptorStack.empty()) {
       associationDescriptor = options.associationDescriptorStack.peek()
@@ -432,6 +433,8 @@ class RelationalScope {
       assert discriminatedAliases : "An association was used for which no alias has been created"
       alias = discriminatedAliases[associationPath]
       assert alias : "An association was used for which no alias has been created"
+    } else if (overrideAssociationDescriptor != null) {
+      alias = overrideAssociationDescriptor.currentRootAlias
     }
     
     return "${alias ?: options.currentRootAlias}.${propertyKey}"
@@ -445,6 +448,7 @@ class RelationalScope {
       isDetachedCriteria: options.isDetachedCriteria,
       detachedCriteriaCount: options.getDetachedCriteriaCount(),
       associationAliases: options.associationAliases,
+      currentRootAlias: options.currentRootAlias,
       criteria: options.criteria
     )
   }

@@ -225,3 +225,47 @@ Feature: Sub-queries
       | title             |
       | Lord of the Rings |
   
+  Scenario: Query with property('../propName') walking inside a subquery
+    Given I have created the following "Book" instances:
+      | title                       | authorName |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    And I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    When I execute the following code:
+      """
+      Book.where {
+        authorName equals: Author.where {
+          name equals: property('../authorName')
+        }.select(['name':'name'])
+      }.all()
+      """
+    Then I should get the following results:
+      | title                       |
+      | Lord of the Rings           |
+      | 20000 Leagues Under the Sea |
+  
+  Scenario: Subquery
+    Given I have created the following "Book" instances:
+      | title                       | authorName |
+      | Lord of the Rings           | Tolkien    |
+      | 20000 Leagues Under the Sea | Verne      |
+    And I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    When I execute the following code:
+      """
+      Book.where {
+        authorName equals: Author.where {
+          name equals: 'Tolkien'
+        }.select(['name':'name'])
+      }.all()
+      """
+    Then I should get the following results:
+      | title             |
+      | Lord of the Rings |
+  
+  

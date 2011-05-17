@@ -44,9 +44,7 @@ class AncestorWalkingPropertyExpression extends AbstractPropertyExpression {
     }
     
     def newOptions = options + [associationPath: associationPath]
-    def aliased = RelationalScope.propertyFor(newOptions, actualPropertyKey, associationDescriptor)
-    
-    return aliased
+    RelationalScope.propertyFor(newOptions, actualPropertyKey, associationDescriptor)
   }
   
 }

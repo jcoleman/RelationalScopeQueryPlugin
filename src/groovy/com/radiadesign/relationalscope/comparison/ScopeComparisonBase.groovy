@@ -69,7 +69,7 @@ class ScopeComparisonBase {
   // Semi-private API: supports subquery comparisons
   // --------------------------------------------------------------------------
   
-  DetachedCriteria detachedCriteriaFor(RelationalScope scope, options) {
+  DetachedCriteria _createDetachedCriteriaFor_(RelationalScope scope, options) {
     options.incrementDetachedCriteriaCount()
     
     def rootAlias = "sqrt_${options.getDetachedCriteriaCount()}"
@@ -90,6 +90,24 @@ class ScopeComparisonBase {
   
   def detachedCriteriaCallback(RelationalScope scope, criteria) {
     // Override in child class if desired...
+  }
+  
+  Criterion createCriterionForSubqueryReturning(RelationalScope scope, Map options, Closure returnGenerator) {
+    def addedDescriptorToStack = !(scope.associationName ?: scope.virtualAssociationName)
+    if (addedDescriptorToStack) {
+      RelationalScope.addAssociationDescriptorToStack( options,
+                                                       null,
+                                                       scope.grailsDomainClass,
+                                                       null )
+    }
+    
+    Criterion criterion = returnGenerator(_createDetachedCriteriaFor_(scope, options))
+    
+    if (addedDescriptorToStack) {
+      options.associationDescriptorStack.pop()
+    }
+    
+    return criterion
   }
   
   
@@ -113,27 +131,37 @@ class ScopeComparisonBase {
   }
   
   Criterion _dispatchToCriterion_(AbstractPropertyExpression prop, RelationalScope scope, options) {
-    this.criterionForPropertyAndSubquery( prop.propertyFor(options),
-                                          this.detachedCriteriaFor(scope, options),
-                                          options )
+    def property = prop.propertyFor(options)
+    createCriterionForSubqueryReturning(scope, options) { detachedCriteria ->
+      this.criterionForPropertyAndSubquery( property,
+                                            detachedCriteria,
+                                            options )
+    }
   }
   
   Criterion _dispatchToCriterion_(RelationalScope scope, AbstractPropertyExpression prop, options) {
-    this.criterionForSubqueryAndProperty( this.detachedCriteriaFor(scope, options),
-                                          prop.propertyFor(options),
-                                          options )
+    def property = prop.propertyFor(options)
+    createCriterionForSubqueryReturning(scope, options) { detachedCriteria ->
+      this.criterionForSubqueryAndProperty( detachedCriteria,
+                                            property,
+                                            options )
+    }
   }
   
   Criterion _dispatchToCriterion_(ValueExpression val, RelationalScope scope, options) {
-    this.criterionForValueAndSubquery( val.value,
-                                       this.detachedCriteriaFor(scope, options),
-                                       options )
+    createCriterionForSubqueryReturning(scope, options) { detachedCriteria ->
+      this.criterionForValueAndSubquery( val.value,
+                                         detachedCriteria,
+                                         options )
+    }
   }
   
   Criterion _dispatchToCriterion_(RelationalScope scope, ValueExpression val, options) {
-    this.criterionForValueAndSubquery( this.detachedCriteriaFor(scope, options),
-                                       val.value,
-                                       options )
+    createCriterionForSubqueryReturning(scope, options) { detachedCriteria ->
+      this.criterionForValueAndSubquery( detachedCriteria,
+                                         val.value,
+                                         options )
+    }
   }
   
   Criterion _dispatchToCriterion_(ArithmeticExpression expr1, ArithmeticExpression expr2, options) {
