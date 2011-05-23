@@ -69,7 +69,11 @@ class ScopeComparisonBase {
   // Semi-private API: supports subquery comparisons
   // --------------------------------------------------------------------------
   
-  DetachedCriteria _createDetachedCriteriaFor_(RelationalScope scope, options) {
+  def detachedCriteriaCallback(RelationalScope scope, criteria) {
+    // Override in child class if desired...
+  }
+  
+  Criterion createCriterionForSubqueryReturning(RelationalScope scope, Map options, Closure returnGenerator) {
     options.incrementDetachedCriteriaCount()
     
     def rootAlias = "sqrt_${options.getDetachedCriteriaCount()}"
@@ -83,28 +87,20 @@ class ScopeComparisonBase {
                                  isDetachedCriteria: true,
                                  currentRootAlias: rootAlias ]
     
-    scope.prepareCriteria(detachedCriteria, newOptions)
-    
-    return detachedCriteria
-  }
-  
-  def detachedCriteriaCallback(RelationalScope scope, criteria) {
-    // Override in child class if desired...
-  }
-  
-  Criterion createCriterionForSubqueryReturning(RelationalScope scope, Map options, Closure returnGenerator) {
     def addedDescriptorToStack = !(scope.associationName ?: scope.virtualAssociationName)
     if (addedDescriptorToStack) {
-      RelationalScope.addAssociationDescriptorToStack( options,
+      RelationalScope.addAssociationDescriptorToStack( newOptions,
                                                        null,
                                                        scope.grailsDomainClass,
                                                        null )
     }
     
-    Criterion criterion = returnGenerator(_createDetachedCriteriaFor_(scope, options))
+    scope.prepareCriteria(detachedCriteria, newOptions)
+    
+    Criterion criterion = returnGenerator(detachedCriteria)
     
     if (addedDescriptorToStack) {
-      options.associationDescriptorStack.pop()
+      newOptions.associationDescriptorStack.pop()
     }
     
     return criterion

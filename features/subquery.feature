@@ -268,4 +268,42 @@ Feature: Sub-queries
       | title             |
       | Lord of the Rings |
   
+  Scenario: Subquery
+    Given I have created the following "Book" instances:
+      | title                              | authorName |
+      | Lord of the Rings                  | Tolkien    |
+      | 20000 Leagues Under the Sea        | Verne      |
+      | Journey to the Center of the Earth | Verne      |
+    And I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    When I execute the following code:
+      """
+      Author.where {
+        name in: Book.where {
+          authorName equals: 'Verne'
+        }.select(authorName: 'author.name')
+      }.all()
+      """
+    Then I should get the following results:
+      | name   |
+    When I execute the following code:
+      """
+      def book = Book.findByTitle('Journey to the Center of the Earth')
+      book.author = Author.findByName('Verne')
+      book.save()
+      """
+    And I execute the following code:
+      """
+      Author.where {
+        name in: Book.where {
+          authorName equals: 'Verne'
+        }.select(authorName: 'author.name')
+      }.all()
+      """
+    Then I should get the following results:
+      | name   |
+      | Verne  |
+  
   
