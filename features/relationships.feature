@@ -98,6 +98,40 @@ Feature: Relationship queries
       | name    |
       | Harold  |
   
+  Scenario: Query using 'in' list of objects from Domain.load()
+    Given I have created the following "MarriedPerson" graph:
+      """
+        [
+          {
+            "name": "Harold",
+            "gender": "male",
+            "age": 18,
+            "spouse": {
+              "class": "MarriedPerson",
+              "name": "Maude"
+            }
+          },
+          {
+            "name": "Maude",
+            "gender": "female",
+            "age": 57
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      def mId
+      MarriedPerson.withNewSession {
+        mId = MarriedPerson.findByName('Maude').id
+      }
+      MarriedPerson.where {
+        spouse in: [MarriedPerson.load(mId)]
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Harold  |
+  
   Scenario: Query using a mapped property
     Given I have the following domain class:
       """

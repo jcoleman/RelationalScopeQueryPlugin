@@ -58,7 +58,7 @@ class RelationalScopeBuilder {
         def val = _valueFor_(expression[i])
         list[i] = val
         
-        if (val instanceof ExpressionBase) { containsExpressions = true }
+        if (val instanceof ExpressionBase && !(val instanceof ValueExpression)) { containsExpressions = true }
       }
       
       new ListExpression(list, !containsExpressions, this)
