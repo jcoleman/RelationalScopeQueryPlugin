@@ -228,6 +228,14 @@ class RelationalScope {
     return grailsDomainClass?.clazz
   }
   
+  static contrainedPropertiesForDomain(domain) {
+    domain.getConstrainedProperties()
+  }
+  
+  static associationIsNullable(domain, propertyName) {
+    contrainedPropertiesForDomain(domain)[propertyName].nullable
+  }
+  
   
   // --------------------------------------------------------------------------
   // Private API
@@ -353,7 +361,7 @@ class RelationalScope {
     }
   }
   
-  static createAssociationAliasIfNecessary(options, associationPath, associationDescriptor=null) {
+  static createAssociationAliasIfNecessary(options, associationPath, domain, propertyName, associationDescriptor=null) {
     def discriminator = RelationalScope.aliasDiscriminatorFor(options, associationDescriptor)
     def optionsOrAssociationDescriptor = (associationDescriptor ?: options)
     def aliasMap = optionsOrAssociationDescriptor.associationAliases[discriminator]
@@ -361,6 +369,7 @@ class RelationalScope {
       aliasMap = optionsOrAssociationDescriptor.associationAliases[discriminator] = [:]
     }
     if (!aliasMap[associationPath]) {
+      def joinSpecification = associationIsNullable(domain, propertyName) ? CriteriaSpecification.LEFT_JOIN : CriteriaSpecification.INNER_JOIN
       def alias = "${discriminator}_${associationPath.replace('.', '_')}"
       optionsOrAssociationDescriptor.criteria
                                     .createAlias( associationPath,
@@ -401,11 +410,11 @@ class RelationalScope {
       propertyKey = propertyKey[lastDotIndex+1..-1]
     }
     
+    def domainClass
     if (associationPath) {
       def associations = associationPath.tokenize('.')
       def path = associations[0]
       
-      def domainClass
       if (associationDescriptor?.parentDomainClass) {
         domainClass = associationDescriptor.parentDomainClass
       } else {
@@ -414,7 +423,7 @@ class RelationalScope {
       
       def currentAssociationProperty = RelationalScope.retrieveAndValidateSelectableProperty(domainClass, path)
       
-      RelationalScope.createAssociationAliasIfNecessary(options, path, associationDescriptor)
+      RelationalScope.createAssociationAliasIfNecessary(options, path, domainClass, currentAssociationProperty.name, associationDescriptor)
       
       if (associations.size() > 1) {
         associations[1..-1].each { association ->
@@ -424,7 +433,7 @@ class RelationalScope {
                                        )
           
           path += ".${association}"
-          RelationalScope.createAssociationAliasIfNecessary(options, path, associationDescriptor)
+          RelationalScope.createAssociationAliasIfNecessary(options, path, currentAssociationProperty.domainClass, currentAssociationProperty.name, associationDescriptor)
         }
       }
       
@@ -458,28 +467,30 @@ class RelationalScope {
     def associationDescriptorStack = options.associationDescriptorStack
     
     def association = associationName ?: virtualAssociationName
+    def parentDomainClass = grailsDomainClass
     def addedPathToStack = ( associationDescriptorStack.empty() || association )
     if (addedPathToStack) {
       // Track our association path and the associated grails domain property.
-      def parentDomainClass = grailsDomainClass
       def associationDomainProperty
       if (association) {
         if (!associationDescriptorStack.empty()) {
           parentDomainClass = associationDescriptorStack.peek().parentDomainClass
         }
         associationDomainProperty = parentDomainClass.getPropertyByName(association)
-        parentDomainClass = associationDomainProperty.referencedDomainClass
       }
-      RelationalScope.addAssociationDescriptorToStack( options,
-                                                       currentAssociationPath,
-                                                       parentDomainClass,
-                                                       associationDomainProperty )
+      
+      RelationalScope.addAssociationDescriptorToStack(
+        options,
+        currentAssociationPath,
+        associationDomainProperty ? associationDomainProperty.referencedDomainClass : parentDomainClass,
+        associationDomainProperty
+      )
     }
     
-    // Are we digging into an associaton?
+    // Are we digging into an associaton? Specifically a one-to-one association...
     if (associationName) {
       // If so, do we need to create new alias?
-      RelationalScope.createAssociationAliasIfNecessary(options, currentAssociationPath)
+      RelationalScope.createAssociationAliasIfNecessary(options, currentAssociationPath, parentDomainClass, associationName)
     }
     
     Criterion criterion
