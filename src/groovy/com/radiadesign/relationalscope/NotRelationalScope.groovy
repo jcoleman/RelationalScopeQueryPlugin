@@ -36,5 +36,8 @@ class NotRelationalScope extends OrRelationalScope {
 
   String toString() {
     "!(${scopes.collect {it.toString()}.join(' || ')})"
-  } 
+  }
+  
+  static junctionInspectString = 'not'
+  
 }

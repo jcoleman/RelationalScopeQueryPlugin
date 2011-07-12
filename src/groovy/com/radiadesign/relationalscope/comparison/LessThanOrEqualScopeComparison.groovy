@@ -38,4 +38,6 @@ class LessThanOrEqualScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} <= ${rhsValue})"
   }
   
+  static operatorInspectString = 'lte'
+  
 }

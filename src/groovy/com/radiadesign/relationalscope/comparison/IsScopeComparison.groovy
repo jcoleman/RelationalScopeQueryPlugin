@@ -49,4 +49,6 @@ class IsScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} == ${rhsValue})"
   }
   
+  static operatorInspectString = 'is'
+  
 }

@@ -1,6 +1,8 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
+import com.radiadesign.relationalscope.comparison.InScopeComparison
+import com.radiadesign.relationalscope.comparison.ExistsScopeComparison
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 class RelationalScope {
@@ -337,6 +339,8 @@ class RelationalScope {
     }
   }
   
+  static junctionInspectString = 'and'
+  
   def junction() {
     Restrictions.conjunction()
   }
@@ -529,6 +533,50 @@ class RelationalScope {
         }
       }
     }
+  }
+  
+  String inspect(indentationLevel=0, parent=null) {
+    StringWriter writer = new StringWriter()
+    def wroteParen = false
+    if (null == parent) {
+      writer.write(' ' * indentationLevel * 2)
+      writer.write(grailsDomainClass.name)
+      writer.write('.where {\n')
+      wroteParen = true
+    } else if (null != associationName) {
+      writer.write(' ' * indentationLevel * 2)
+      writer.write('property(')
+      writer.write(associationName.inspect())
+      writer.write(') where: {\n')
+      wroteParen = true
+    } else if (parent instanceof InScopeComparison || parent instanceof ExistsScopeComparison) {
+      writer.write(grailsDomainClass.name)
+      writer.write('.where {\n')
+      wroteParen = true
+    }
+    
+    if (scopes.size() == 1) {
+      writer.write( scopes.first().inspect(indentationLevel + 1, this) )
+    } else if (scopes.size() > 1) {
+      writer.write(' ' * indentationLevel * 2)
+      writer.write(this.class.junctionInspectString)
+      writer.write(' {\n')
+      scopes.each { scope ->
+        writer.write( scope.inspect(indentationLevel + 1, this) )
+      }
+      writer.write(' ' * indentationLevel * 2)
+      writer.write('}\n')
+    } else {
+      writer.write(' ' * indentationLevel * 2)
+      writer.write('/* Empty Scope */')
+    }
+    
+    if (wroteParen) {
+      writer.write(' ' * indentationLevel * 2)
+      writer.write('}\n')
+    }
+    
+    writer.toString()
   }
 
   String toString() {

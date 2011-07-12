@@ -22,4 +22,6 @@ class BetweenScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} between ${rhsValue.join(' and ')})"
   }
   
+  static operatorInspectString = 'between'
+  
 }

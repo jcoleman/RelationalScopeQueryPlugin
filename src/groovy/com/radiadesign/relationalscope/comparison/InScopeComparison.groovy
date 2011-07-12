@@ -33,4 +33,6 @@ class InScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} in ${rhsValue})"
   }
   
+  static operatorInspectString = 'in'
+  
 }

@@ -17,4 +17,6 @@ class LikeScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} LIKE ${rhsValue})"
   }
   
+  static operatorInspectString = 'like'
+  
 }

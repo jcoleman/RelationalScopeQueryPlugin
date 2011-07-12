@@ -27,4 +27,14 @@ class ExistsScopeComparison extends ScopeComparisonBase {
     return "(exists (${scope}))"
   }
   
+  String inspect(indentationLevel=0, parent=null) {
+    StringWriter writer = new StringWriter()
+    writer.write('' * indentationLevel * 2)
+    writer.write('exists {\n')
+    writer.write(scope.inspect(indentationLevel + 1, this))
+    writer.write('}\n')
+    
+    writer.toString()
+  }
+  
 }

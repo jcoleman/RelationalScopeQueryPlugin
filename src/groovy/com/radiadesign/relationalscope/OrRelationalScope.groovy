@@ -37,5 +37,7 @@ class OrRelationalScope extends RelationalScope {
   String toString() {
     "(${scopes.collect {it.toString()}.join(' || ')})"
   } 
+  
+  static junctionInspectString = 'or'
 
 }

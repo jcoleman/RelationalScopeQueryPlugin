@@ -56,4 +56,6 @@ class NotEqualsScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} != ${rhsValue})"
   }
   
+  static operatorInspectString = 'notEquals'
+  
 }

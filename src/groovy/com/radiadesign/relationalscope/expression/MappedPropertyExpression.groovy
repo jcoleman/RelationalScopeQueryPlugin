@@ -17,4 +17,8 @@ class MappedPropertyExpression extends AbstractPropertyExpression {
     }
   }
   
+  String inspect(indentationLevel=0, parent=null) {
+    "mapping(${propertyKey})" as String
+  }
+  
 }

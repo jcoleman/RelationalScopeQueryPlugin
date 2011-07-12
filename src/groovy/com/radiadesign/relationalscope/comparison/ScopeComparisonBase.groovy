@@ -197,6 +197,19 @@ class ScopeComparisonBase {
   // Other
   // --------------------------------------------------------------------------
   
+  String inspect(indentationLevel=0, parent=null) {
+    StringWriter writer = new StringWriter()
+    writer.write(' ' * indentationLevel * 2)
+    writer.write(lhsValue.inspect(indentationLevel + 1, this))
+    writer.write(' ')
+    writer.write(operatorInspectString)
+    writer.write(': ')
+    writer.write(rhsValue.inspect(indentationLevel + 1, this))
+    writer.write('\n')
+    
+    writer.toString()
+  }
+  
   String toString() {
     return "ScopeComparisonBase[rhsValue: ${rhsValue}, lhsValue: ${lhsValue}]"
   }

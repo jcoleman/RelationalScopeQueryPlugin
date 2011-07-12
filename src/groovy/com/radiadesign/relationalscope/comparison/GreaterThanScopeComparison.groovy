@@ -38,4 +38,6 @@ class GreaterThanScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} > ${rhsValue})"
   }
   
+  static operatorInspectString = 'gt'
+  
 }

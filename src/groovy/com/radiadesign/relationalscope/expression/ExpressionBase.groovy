@@ -58,4 +58,8 @@ class ExpressionBase {
     return new ArithmeticExpression(null, this, '-', builder)
   }
   
+  String inspect(indentationLevel=0) {
+    toString()
+  }
+  
 }

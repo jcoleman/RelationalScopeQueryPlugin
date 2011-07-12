@@ -18,4 +18,8 @@ class AbstractPropertyExpression extends ExpressionBase {
     throw new RuntimeException("Please implement propertyFor() in the extending class.")
   }
   
+  String inspect(indentationLevel=0, parent=null) {
+    "property(${propertyKey.inspect()})" as String
+  }
+  
 }

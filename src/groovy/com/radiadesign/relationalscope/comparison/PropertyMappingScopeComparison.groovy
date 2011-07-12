@@ -18,4 +18,6 @@ class PropertyMappingScopeComparison extends ScopeComparisonBase {
     return "(${lhsValue} => ${rhsValue})"
   }
   
+  static operatorInspectString = 'mapTo'
+  
 }

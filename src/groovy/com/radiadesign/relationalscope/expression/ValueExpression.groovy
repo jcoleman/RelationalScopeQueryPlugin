@@ -12,4 +12,8 @@ class ValueExpression extends ExpressionBase {
     value = _value
   }
   
+  String inspect(indentationLevel=0, parent=null) {
+    "value(${value.inspect()})"
+  }
+  
 }
