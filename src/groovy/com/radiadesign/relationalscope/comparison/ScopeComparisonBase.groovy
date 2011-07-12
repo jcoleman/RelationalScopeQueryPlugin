@@ -103,6 +103,8 @@ class ScopeComparisonBase {
       newOptions.associationDescriptorStack.pop()
     }
     
+    options.decrementDetachedCriteriaCount()
+    
     return criterion
   }
   

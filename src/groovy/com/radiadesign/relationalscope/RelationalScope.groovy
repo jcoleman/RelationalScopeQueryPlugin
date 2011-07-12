@@ -254,6 +254,7 @@ class RelationalScope {
                                  associationAliases: [:],
                                  propertyMappings: [:],
                                  getDetachedCriteriaCount: { -> return detachedCriteriaCount },
+                                  decrementDetachedCriteriaCount: { -> detachedCriteriaCount -= 1 },
                                  incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
     return criteria
   }

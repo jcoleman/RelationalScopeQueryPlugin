@@ -306,4 +306,40 @@ Feature: Sub-queries
       | name   |
       | Verne  |
   
+  Scenario: Using a lower level association after entering another subquery (used to throw a hibernate duplicate asociation path exception)
+    Given I have created the following "Book" instances:
+      | title                              | authorName |
+      | Lord of the Rings                  | Tolkien    |
+      | 20000 Leagues Under the Sea        | Verne      |
+      | Journey to the Center of the Earth | Verne      |
+    And I have created the following "Author" instances:
+      | name     |
+      | Tolkien  |
+      | Verne    |
+    And I execute the following code:
+      """
+      def book = Book.findByTitle('Journey to the Center of the Earth')
+      book.author = Author.findByName('Verne')
+      book.save()
+      """
+    When I execute the following code:
+      """
+      Author.where {
+        name in: Book.where {
+          author where:  {
+            name equals: 'Verne'
+          }
+          id in: Book.where {
+            title equals: 'Journey to the Center of the Earth'
+          }
+          author where: {
+            name notEquals: 'Tolkien'
+          }
+        }.select(authorName: 'author.name')
+      }.all()
+      """
+    Then I should get the following results:
+      | name   |
+      | Verne  |
+  
   
