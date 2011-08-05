@@ -1,6 +1,7 @@
 package com.radiadesign.relationalscope
 
 import org.hibernate.criterion.*
+import org.hibernate.FetchMode
 import com.radiadesign.relationalscope.comparison.InScopeComparison
 import com.radiadesign.relationalscope.comparison.ExistsScopeComparison
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
@@ -21,6 +22,8 @@ class RelationalScope {
   def scopes = []
   def selections = []
   def selectionKeys = []
+  
+  def fetchedAssociations = []
   
   def skipCount
   def takeCount
@@ -53,6 +56,7 @@ class RelationalScope {
     grailsDomainClass = scope.grailsDomainClass
     selections = scope.selections.clone()
     selectionKeys = scope.selectionKeys.clone()
+    fetchedAssociations = scope.fetchedAssociations.clone()
     takeCount = scope.takeCount
     skipCount = scope.skipCount
     orderBy = scope.orderBy.clone()
@@ -158,6 +162,19 @@ class RelationalScope {
     }
     
     return this.select(builder._selections_, _selectionKeys)
+  }
+  
+  def fetch(Object[] associations) {
+    def newScope = this.clone()
+    // Without the cast, instead of [] we get [[]]
+    newScope.fetchedAssociations += (Collection)associations
+    return newScope
+  }
+  
+  def fetch(Collection associations) {
+    def newScope = this.clone()
+    newScope.fetchedAssociations += associations
+    return newScope
   }
 
   def order(property, direction = 'asc') {
@@ -333,10 +350,14 @@ class RelationalScope {
     if (skipCount != null) {
       criteria.firstResult = skipCount
     }
-
+    
     orderBy.each { orderProperty ->
       criteria.addOrder( new Order(RelationalScope.propertyFor(options, orderProperty.property),
                                    orderProperty.direction == 'asc') )
+    }
+    
+    fetchedAssociations.each { association ->
+      criteria.setFetchMode(association, FetchMode.JOIN)
     }
   }
   
