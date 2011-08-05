@@ -254,7 +254,7 @@ class RelationalScope {
                                  associationAliases: [:],
                                  propertyMappings: [:],
                                  getDetachedCriteriaCount: { -> return detachedCriteriaCount },
-                                  decrementDetachedCriteriaCount: { -> detachedCriteriaCount -= 1 },
+                                 decrementDetachedCriteriaCount: { -> detachedCriteriaCount -= 1 },
                                  incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
     return criteria
   }
@@ -379,7 +379,7 @@ class RelationalScope {
       optionsOrAssociationDescriptor.criteria
                                     .createAlias( associationPath,
                                                   alias,
-                                                  CriteriaSpecification.LEFT_JOIN )
+                                                  joinSpecification )
       aliasMap[associationPath] = alias
     }
   }
