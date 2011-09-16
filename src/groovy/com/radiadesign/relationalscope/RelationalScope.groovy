@@ -329,7 +329,7 @@ class RelationalScope {
   def executeCount() {
     countIsSet = true
     resultCount = executableCriteria(false, [ignoreOrderBy: true])
-                    .setProjection(Projections.countDistinct("id"))
+                    .setProjection(Projections.count("id"))
                     .list()
                     .first()
   }
