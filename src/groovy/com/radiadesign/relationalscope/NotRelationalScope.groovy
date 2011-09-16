@@ -13,10 +13,6 @@ class NotRelationalScope extends OrRelationalScope {
     super(_grailsDomainClass)
   }
   
-  //NotRelationalScope(JSONObject json) {
-  //  super(json)
-  //}
-  
   protected NotRelationalScope(NotRelationalScope scope) {
     super(scope)
   }

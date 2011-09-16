@@ -13,10 +13,6 @@ class OrRelationalScope extends RelationalScope {
     super(_grailsDomainClass)
   }
   
-  //OrRelationalScope(JSONObject json) {
-  //  super(json)
-  //}
-  
   protected OrRelationalScope(OrRelationalScope scope) {
     super(scope)
   }

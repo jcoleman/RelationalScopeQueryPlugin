@@ -46,10 +46,6 @@ class RelationalScope {
     grailsDomainClass = _grailsDomainClass
   }
   
-  //RelationalScope(JSONObject json) {
-  //  
-  //}
-  
   protected RelationalScope(RelationalScope scope) {
     // Provides a deep copy of the stored scopes to ensure thread safety
     scopes = scope.scopes.clone()
