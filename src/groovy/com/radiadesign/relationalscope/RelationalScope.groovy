@@ -256,19 +256,23 @@ class RelationalScope {
   // Private API
   // --------------------------------------------------------------------------
 
-  def executableCriteria(unique) {
+  def executableCriteria(unique, options=null) {
     def session = sessionFactory.currentSession
     def criteria = session.createCriteria(domainKlass, "root")
-    prepareCriteria( criteria, [ criteria: criteria,
-                                 rootDomainClass: grailsDomainClass,
-                                 currentRootAlias: "root",
-                                 associationPath: associationName,
-                                 associationDescriptorStack: new Stack(),
-                                 associationAliases: [:],
-                                 propertyMappings: [:],
-                                 getDetachedCriteriaCount: { -> return detachedCriteriaCount },
-                                 decrementDetachedCriteriaCount: { -> detachedCriteriaCount -= 1 },
-                                 incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ] )
+    
+    def newOptions = [ criteria: criteria,
+                       rootDomainClass: grailsDomainClass,
+                       currentRootAlias: "root",
+                       associationPath: associationName,
+                       associationDescriptorStack: new Stack(),
+                       associationAliases: [:],
+                       propertyMappings: [:],
+                       getDetachedCriteriaCount: { -> return detachedCriteriaCount },
+                       decrementDetachedCriteriaCount: { -> detachedCriteriaCount -= 1 },
+                       incrementDetachedCriteriaCount: { -> detachedCriteriaCount += 1 } ]
+    if (null != options) { newOptions.putAll(options) }
+    
+    prepareCriteria(criteria, newOptions)
     return criteria
   }
   
@@ -324,7 +328,10 @@ class RelationalScope {
 
   def executeCount() {
     countIsSet = true
-    resultCount = executableCriteria(false).setProjection(Projections.countDistinct("id")).list().first()
+    resultCount = executableCriteria(false, [ignoreOrderBy: true])
+                    .setProjection(Projections.countDistinct("id"))
+                    .list()
+                    .first()
   }
   
   def prepareCriteria(criteria, options) {
@@ -347,9 +354,11 @@ class RelationalScope {
       criteria.firstResult = skipCount
     }
     
-    orderBy.each { orderProperty ->
-      criteria.addOrder( new Order(RelationalScope.propertyFor(options, orderProperty.property),
-                                   orderProperty.direction == 'asc') )
+    if (!options.ignoreOrderBy) {
+      orderBy.each { orderProperty ->
+        def prop = RelationalScope.propertyFor(options, orderProperty.property)
+        criteria.addOrder( new Order(prop, orderProperty.direction == 'asc') )
+      }
     }
     
     fetchedAssociations.each { association ->
