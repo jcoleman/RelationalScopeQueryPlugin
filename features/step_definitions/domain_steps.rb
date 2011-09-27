@@ -97,6 +97,13 @@ When /^I execute the following code:$/ do |code|
   @result = @grails.execute code
 end
 
+When /^I execute the following code to create '?([A-Za-z0-9]+)'? instances:$/ do |klass, code|
+  # Mark this class as having data that needs to be deleted
+  @dirty_classes << klass
+  
+  @result = @grails.execute code
+end
+
 Then /^I should get 'null'$/ do
   @result.should equal(nil)
 end

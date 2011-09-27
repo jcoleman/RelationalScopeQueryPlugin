@@ -318,3 +318,99 @@ Feature: Relationship queries
       | name    |
       | Nancy   |
       | Harold  |
+
+  Scenario: Query joining to non-nullable association of a nullable association within an "or" scope
+    Given I have the following domain class:
+      """
+      class Country {
+        String code
+      }
+      """
+    And I have the following domain class:
+      """
+      class Residence {
+        String streetAddress
+        Country country
+
+        static constraints = {
+          streetAddress nullable: true
+          country nullable: false
+        }
+      }
+      """
+    And I have the following domain class:
+      """
+      class Family {
+        String name
+        Residence residence
+        
+        static constraints = {
+          name nullable: false
+          residence nullable: true
+        }
+      }
+      """
+    And I have created the following "Country" instances:
+      | code |
+      | US   |
+    And I execute the following code to create 'Residence' instances:
+      """
+      def residence = Residence.newInstance(
+        streetAddress: '5293 Main Street',
+        country: Country.findByCode('US')
+      )
+      residence.save()
+      """
+    And I have created the following "Family" graph:
+      """
+        [
+          {
+            "name": "Collins",
+            "residence": {
+              "class": "Residence",
+              "streetAddress": "5293 Main Street"
+            }
+          },
+          {
+            "name": "Kanes"
+          }
+        ]
+      """
+    When I execute the following code:
+      """
+      Family.where {
+        or {
+          residence where: {
+            country where: {
+              code equals: 'US'
+            }
+          }
+          residence is: null
+        }
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Collins |
+      | Kanes   |
+    When I execute the following code:
+      """
+      Family.where {
+        or {
+          or {
+            residence is: null
+            name is: null // Pointless, but need an additional restriction in the 'or' scope
+          }
+          residence where: {
+            country where: {
+              code equals: 'US'
+            }
+          }
+        }
+      }.all()
+      """
+    Then I should get the following results:
+      | name    |
+      | Collins |
+      | Kanes   |
+

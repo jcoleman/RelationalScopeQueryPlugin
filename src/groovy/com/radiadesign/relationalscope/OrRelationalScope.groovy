@@ -29,6 +29,19 @@ class OrRelationalScope extends RelationalScope {
   def junction() {
     Restrictions.disjunction()
   }
+  
+  Criterion toCriterion(options) {
+    def originalWithinOrScopeFlag = options.withinOrScope
+    options.withinOrScope = true
+    
+    Criterion criterion = super.toCriterion(options)
+    
+    // The weird indirection here setting it back to the original is to handle
+    // the case where we have nested 'or' scopes. We don't want to unset the
+    // flag until we exit the parent-most 'or' scope.
+    options.withinOrScope = originalWithinOrScopeFlag
+    return criterion
+  }
 
   String toString() {
     "(${scopes.collect {it.toString()}.join(' || ')})"

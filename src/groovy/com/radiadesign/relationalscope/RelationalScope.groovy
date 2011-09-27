@@ -400,7 +400,12 @@ class RelationalScope {
       aliasMap = optionsOrAssociationDescriptor.associationAliases[discriminator] = [:]
     }
     if (!aliasMap[associationPath]) {
-      def joinSpecification = associationIsNullable(domain, propertyName) ? CriteriaSpecification.LEFT_JOIN : CriteriaSpecification.INNER_JOIN
+      def joinSpecification
+      if (options.withinOrScope || associationIsNullable(domain, propertyName)) {
+        joinSpecification = CriteriaSpecification.LEFT_JOIN
+      } else {
+        joinSpecification = CriteriaSpecification.INNER_JOIN
+      }
       def alias = "${discriminator}_${associationPath.replace('.', '_')}"
       optionsOrAssociationDescriptor.criteria
                                     .createAlias( associationPath,
