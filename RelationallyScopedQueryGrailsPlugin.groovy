@@ -59,6 +59,10 @@ will be a level of introspection into the logical expression generated that Crit
         klass.defaultScope().where(arg)
       }
       
+      klass.metaClass.static.all = {
+        klass.defaultScope().all()
+      }
+      
       klass.metaClass.static.getAt = { index ->
         klass.where {
           id equals: index as Long
